@@ -19,6 +19,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import top.yukonga.miuix.kmp.basic.TextField
 
 class StudioNavigationTest {
     @get:Rule val compose = createComposeRule()
@@ -27,12 +28,12 @@ class StudioNavigationTest {
     private fun showNavigation(enabled: Boolean = true): StateRestorationTester {
         val restoration = StateRestorationTester(compose)
         restoration.setContent {
-            MaterialTheme {
+            AppTheme {
                 pager = rememberPagerState { StudioTab.entries.size }
                 StudioNavigation(pager, rememberSaveableStateHolder(), enabled, {}, {}) { tab, _ ->
                     var text by rememberSaveable { mutableStateOf("") }
                     Column(Modifier.fillMaxSize().testTag("page-${tab.name}")) {
-                        OutlinedTextField(text, { text = it }, Modifier.testTag("input-${tab.name}"))
+                        TextField(text, { text = it }, Modifier.testTag("input-${tab.name}"), label = "input")
                     }
                 }
             }

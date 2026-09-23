@@ -17,12 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +27,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.model.TimingCandidate
 import java.util.Locale
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -42,10 +42,10 @@ fun TimingGeometryChart(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        shape = RoundedCornerShape(12.dp)
+        cornerRadius = 12.dp,
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -58,25 +58,25 @@ fun TimingGeometryChart(
             ) {
                 Text(
                     text = "DSI 时序几何剖面",
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MiuixTheme.textStyles.title3,
                     fontWeight = FontWeight.SemiBold
                 )
                 Surface(
                     color = if (candidate.hasFullGeometry) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        MiuixTheme.colorScheme.primaryContainer
                     } else {
-                        MaterialTheme.colorScheme.errorContainer
+                        MiuixTheme.colorScheme.errorContainer
                     },
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         text = if (candidate.hasFullGeometry) "完整几何" else "部分缺省",
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         color = if (candidate.hasFullGeometry) {
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                            MiuixTheme.colorScheme.onPrimaryContainer
                         } else {
-                            MaterialTheme.colorScheme.onErrorContainer
+                            MiuixTheme.colorScheme.onErrorContainer
                         }
                     )
                 }
@@ -90,14 +90,14 @@ fun TimingGeometryChart(
                     Icon(
                         Icons.Default.Info,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
+                        tint = MiuixTheme.colorScheme.tertiaryContainer,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "该节点缺少完整的 Front/Back Porch 参数，部分超频策略将自动降级为纯时钟模式。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                 }
             } else {
@@ -149,10 +149,10 @@ fun TimingGeometryChart(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    LegendItem(color = MaterialTheme.colorScheme.primary, label = "Active 显像区")
-                    LegendItem(color = MaterialTheme.colorScheme.secondary, label = "Front Porch 前肩")
-                    LegendItem(color = MaterialTheme.colorScheme.tertiary, label = "Sync 同步脉宽")
-                    LegendItem(color = MaterialTheme.colorScheme.outline, label = "Back Porch 后肩")
+                    LegendItem(color = MiuixTheme.colorScheme.primary, label = "Active 显像区")
+                    LegendItem(color = MiuixTheme.colorScheme.secondary, label = "Front Porch 前肩")
+                    LegendItem(color = MiuixTheme.colorScheme.tertiaryContainer, label = "Sync 同步脉宽")
+                    LegendItem(color = MiuixTheme.colorScheme.outline, label = "Back Porch 后肩")
                 }
             }
         }
@@ -178,14 +178,14 @@ private fun TimingAxisBar(
         ) {
             Text(
                 axisName,
-                style = MaterialTheme.typography.labelMedium,
+                style = MiuixTheme.textStyles.footnote1,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 "总计 $total $unit (消隐 ${String.format(Locale.US, "%.1f", blankingPct)}%)",
-                style = MaterialTheme.typography.labelSmall,
+                style = MiuixTheme.textStyles.footnote2,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MiuixTheme.colorScheme.onSurfaceSecondary
             )
         }
 
@@ -206,25 +206,25 @@ private fun TimingAxisBar(
                     modifier = Modifier
                         .weight(weightActive)
                         .height(18.dp)
-                        .background(MaterialTheme.colorScheme.primary)
+                        .background(MiuixTheme.colorScheme.primary)
                 )
                 Box(
                     modifier = Modifier
                         .weight(weightFp)
                         .height(18.dp)
-                        .background(MaterialTheme.colorScheme.secondary)
+                        .background(MiuixTheme.colorScheme.secondary)
                 )
                 Box(
                     modifier = Modifier
                         .weight(weightSync)
                         .height(18.dp)
-                        .background(MaterialTheme.colorScheme.tertiary)
+                        .background(MiuixTheme.colorScheme.tertiaryContainer)
                 )
                 Box(
                     modifier = Modifier
                         .weight(weightBp)
                         .height(18.dp)
-                        .background(MaterialTheme.colorScheme.outline)
+                        .background(MiuixTheme.colorScheme.outline)
                 )
             }
         }
@@ -236,27 +236,27 @@ private fun TimingAxisBar(
         ) {
             Text(
                 "显像 $active",
-                style = MaterialTheme.typography.labelSmall,
+                style = MiuixTheme.textStyles.footnote2,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.primary
+                color = MiuixTheme.colorScheme.primary
             )
             Text(
                 "前肩 $frontPorch",
-                style = MaterialTheme.typography.labelSmall,
+                style = MiuixTheme.textStyles.footnote2,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.secondary
+                color = MiuixTheme.colorScheme.secondary
             )
             Text(
                 "同步 $sync",
-                style = MaterialTheme.typography.labelSmall,
+                style = MiuixTheme.textStyles.footnote2,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MiuixTheme.colorScheme.tertiaryContainer
             )
             Text(
                 "后肩 $backPorch",
-                style = MaterialTheme.typography.labelSmall,
+                style = MiuixTheme.textStyles.footnote2,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.outline
+                color = MiuixTheme.colorScheme.outline
             )
         }
     }
@@ -276,9 +276,8 @@ private fun LegendItem(color: Color, label: String) {
         )
         Text(
             label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurfaceSecondary
         )
     }
 }
-

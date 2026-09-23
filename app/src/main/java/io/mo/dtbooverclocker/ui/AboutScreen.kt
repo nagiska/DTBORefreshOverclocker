@@ -31,19 +31,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +40,7 @@ import androidx.compose.ui.Alignment
 import io.mo.dtbooverclocker.ui.components.DisclaimerDialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -61,10 +49,21 @@ import androidx.compose.ui.viewinterop.AndroidView
 import io.mo.dtbooverclocker.BuildConfig
 import io.mo.dtbooverclocker.ui.components.UpdateCheckDialog
 import io.mo.dtbooverclocker.update.GitHubUpdateChecker
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private const val GITHUB_REPO_URL = GitHubUpdateChecker.REPOSITORY_URL
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onNavigateBack: () -> Unit) {
     BackHandler(onBack = onNavigateBack)
@@ -74,8 +73,8 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("关于", fontWeight = FontWeight.SemiBold) },
+            SmallTopAppBar(
+                title = "关于",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -110,7 +109,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             Surface(
                 modifier = Modifier.size(96.dp),
                 shape = RoundedCornerShape(22.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MiuixTheme.colorScheme.surfaceVariant,
                 shadowElevation = 3.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -131,7 +130,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                             Icons.Default.Code,
                             contentDescription = "应用图标",
                             modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MiuixTheme.colorScheme.primary
                         )
                     }
                 }
@@ -144,36 +143,37 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             ) {
                 Text(
                     text = "DTBO Refresh Overclocker",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MiuixTheme.textStyles.headline1,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "Android DTBO 屏幕刷新率超频工具",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MiuixTheme.textStyles.body2,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                 )
 
                 Spacer(Modifier.height(4.dp))
 
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    color = MiuixTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
                         text = "v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MiuixTheme.textStyles.footnote1,
                         fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = MiuixTheme.colorScheme.onSecondaryContainer
                     )
                 }
             }
 
             Spacer(Modifier.height(4.dp))
 
-            OutlinedButton(
+            Button(
                 onClick = { showUpdateDialog = true },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors()
             ) {
                 Icon(Icons.Default.SystemUpdate, contentDescription = null)
                 Spacer(Modifier.width(6.dp))
@@ -183,10 +183,9 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             // Source Code Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.surface
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -199,20 +198,20 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                         Icon(
                             Icons.Default.Code,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MiuixTheme.colorScheme.primary
                         )
                         Text(
                             text = "开源仓库",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MiuixTheme.textStyles.title2,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
 
                     Text(
                         text = GITHUB_REPO_URL,
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MiuixTheme.textStyles.footnote1,
                         fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
 
                     Row(
@@ -228,20 +227,22 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                                     Toast.makeText(context, "未找到可用浏览器", Toast.LENGTH_SHORT).show()
                                 }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColorsPrimary()
                         ) {
                             Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
                             Spacer(Modifier.width(6.dp))
                             Text("查看源码")
                         }
 
-                        OutlinedButton(
+                        Button(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("DTBO Source Repo", GITHUB_REPO_URL)
                                 clipboard.setPrimaryClip(clip)
                                 Toast.makeText(context, "仓库链接已复制", Toast.LENGTH_SHORT).show()
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors()
                         ) {
                             Icon(Icons.Default.ContentCopy, contentDescription = null)
                             Spacer(Modifier.width(4.dp))
@@ -254,10 +255,9 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             // Architecture & Features Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.surface
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -270,11 +270,11 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                         Icon(
                             Icons.Default.Security,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MiuixTheme.colorScheme.primary
                         )
                         Text(
                             text = "核心架构与安全",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MiuixTheme.textStyles.title2,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -284,9 +284,9 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                                 "• 三层防砖保障：强制物理分区完整备份、离线 Recovery 救砖包预生成、写后回读 SHA-256 自动回滚。\n" +
                                 "• 单槽位物理隔离：严格仅操作当前活跃 A/B 槽位，杜绝双槽破坏。\n" +
                                 "• 多种时序调整策略：支持平衡消隐时间 (Blanking Time)、仅像素时钟、仅帧率等调校模式。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.3
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary,
+                        lineHeight = MiuixTheme.textStyles.footnote1.lineHeight * 1.3
                     )
                 }
             }
@@ -294,10 +294,9 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             // Disclaimer Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.surface
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -310,24 +309,25 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                         Icon(
                             Icons.Default.Warning,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
+                            tint = MiuixTheme.colorScheme.error
                         )
                         Text(
                             text = "免责声明与风险须知",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MiuixTheme.textStyles.title2,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
 
                     Text(
                         text = "本软件属于高危底层硬件调试工具。使用前请确保您已完整知悉屏幕黑屏、Bootloop 及硬件损耗风险，并具备独立救砖能力。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
 
-                    OutlinedButton(
+                    Button(
                         onClick = { showDisclaimerDialog = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors()
                     ) {
                         Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
@@ -339,8 +339,8 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             // License & Disclaimer
             Text(
                 text = "本应用为开源工具，仅供设备所有者与系统开发者进行屏幕显示测试与超频研究。使用物理刷写功能存在一定风险，请务必保管好预生成的备份救砖文件。",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
+                style = MiuixTheme.textStyles.footnote2,
+                color = MiuixTheme.colorScheme.outline,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
             )
 

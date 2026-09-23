@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -18,6 +17,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import io.mo.dtbooverclocker.ui.components.MiuixSelectableChip
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.LinearProgressIndicator
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 private class NodeLoadResult(
     val nodes: List<DtsNodeSummary> = emptyList(),
@@ -67,31 +73,31 @@ fun DeviceTreeScreen(state: MainUiState, contentPadding: PaddingValues) {
     val nodes = filtered.nodes
     LazyColumn(Modifier.fillMaxSize().padding(contentPadding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item { Spacer(Modifier.height(2.dp)) }
-        item { Column { Text("设备树", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold); Text("当前阶段提供只读浏览与搜索；下一阶段在这里接入通用属性编辑。", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+        item { Column { Text("设备树", style = MiuixTheme.textStyles.headline1, fontWeight = FontWeight.Bold); Text("当前阶段提供只读浏览与搜索；下一阶段在这里接入通用属性编辑。", color = MiuixTheme.colorScheme.onSurfaceSecondary) } }
         if (workspace == null) {
             item { Card(Modifier.fillMaxWidth()) { Text("请先在“概览”加载一个 DTBO 工作区。", modifier = Modifier.padding(18.dp)) } }
         } else {
             item {
                 LazyRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(workspace.dtsFiles.size, key = { workspace.dtsFiles[it].path }) { index ->
-                        FilterChip(
+                        MiuixSelectableChip(
+                            text = "Entry $index",
                             selected = entry == index,
-                            onClick = { selectedEntry = index },
-                            label = { Text("Entry $index") }
+                            onClick = { selectedEntry = index }
                         )
                     }
                 }
             }
-            item { OutlinedTextField(query, { query = it }, label = { Text("搜索节点路径") }, singleLine = true, modifier = Modifier.fillMaxWidth()) }
+            item { TextField(query, { query = it }, label = "搜索节点路径", singleLine = true, modifier = Modifier.fillMaxWidth()) }
             item {
                 when {
                     filtered.loading -> LinearProgressIndicator(Modifier.fillMaxWidth())
-                    filtered.error != null -> Text("设备树读取失败：${filtered.error}", color = MaterialTheme.colorScheme.error)
-                    else -> Text("Entry $entry · ${nodes.size} 个节点", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    filtered.error != null -> Text("设备树读取失败：${filtered.error}", color = MiuixTheme.colorScheme.error)
+                    else -> Text("Entry $entry · ${nodes.size} 个节点", style = MiuixTheme.textStyles.subtitle, color = MiuixTheme.colorScheme.onSurfaceSecondary)
                 }
             }
             items(nodes, key = { it.path }, contentType = { "node" }) { node ->
-                Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Icon(Icons.Default.AccountTree, null); Column(Modifier.weight(1f)) { Text(node.path, fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall); Text(node.propertyCount.toString() + " 个直接属性", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) } } }
+                Card(Modifier.fillMaxWidth()) { Row(Modifier.padding(14.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) { Icon(Icons.Default.AccountTree, null); Column(Modifier.weight(1f)) { Text(node.path, fontFamily = FontFamily.Monospace, style = MiuixTheme.textStyles.footnote1); Text(node.propertyCount.toString() + " 个直接属性", style = MiuixTheme.textStyles.footnote2, color = MiuixTheme.colorScheme.onSurfaceSecondary) } } }
             }
         }
         item { Spacer(Modifier.height(24.dp)) }

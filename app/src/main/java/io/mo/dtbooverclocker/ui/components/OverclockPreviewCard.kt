@@ -18,13 +18,6 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +31,13 @@ import io.mo.dtbooverclocker.model.PatchMode
 import io.mo.dtbooverclocker.model.PatchStrategy
 import io.mo.dtbooverclocker.model.TimingCandidate
 import java.util.Locale
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 fun OverclockPreviewCard(
@@ -70,10 +70,10 @@ fun OverclockPreviewCard(
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
-        ),
-        shape = RoundedCornerShape(12.dp)
+        cornerRadius = 12.dp,
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -88,13 +88,13 @@ fun OverclockPreviewCard(
                     Icon(
                         Icons.Default.Speed,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MiuixTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
                         "超频效果实时推演",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MiuixTheme.textStyles.title3,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -117,7 +117,7 @@ fun OverclockPreviewCard(
                         Spacer(Modifier.width(4.dp))
                         Text(
                             sim.risk.label,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MiuixTheme.textStyles.footnote2,
                             fontWeight = FontWeight.Bold,
                             color = riskColor
                         )
@@ -127,7 +127,7 @@ fun OverclockPreviewCard(
 
             if (mode == PatchMode.APPEND_NEW) {
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                    color = MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -139,14 +139,14 @@ fun OverclockPreviewCard(
                         Icon(
                             Icons.Default.AddCircle,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.secondary,
+                            tint = MiuixTheme.colorScheme.secondary,
                             modifier = Modifier.size(16.dp)
                         )
                         Text(
                             "新增独立档位模式：保留原 ${sim.originalHz} Hz 档位，追加 ${sim.targetHz} Hz",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MiuixTheme.textStyles.footnote2,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                            color = MiuixTheme.colorScheme.onSecondaryContainer
                         )
                     }
                 }
@@ -161,32 +161,32 @@ fun OverclockPreviewCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         if (mode == PatchMode.APPEND_NEW) "新增刷新率 (原档保留)" else "刷新率变换",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                     Spacer(Modifier.height(2.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             "${sim.originalHz} Hz",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MiuixTheme.textStyles.body2,
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
                         Text(
                             " ➔ ",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.outline
+                            style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.outline
                         )
                         Text(
                             "${sim.targetHz} Hz",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MiuixTheme.textStyles.title2,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MiuixTheme.colorScheme.primary
                         )
                     }
                     val sign = if (sim.hzDelta >= 0) "+" else ""
                     Text(
                         "$sign${sim.hzDelta} Hz ($sign${String.format(Locale.US, "%.1f", sim.hzPercentage)}%)",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontWeight = FontWeight.SemiBold,
                         color = riskColor
                     )
@@ -196,29 +196,29 @@ fun OverclockPreviewCard(
                 Column(modifier = Modifier.weight(1.3f)) {
                     Text(
                         "预估 Pixel Clock",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                     Spacer(Modifier.height(2.dp))
                     Text(
                         TimingUtils.formatClockCompact(sim.estimatedClockHz),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MiuixTheme.textStyles.title2,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MiuixTheme.colorScheme.primary
                     )
                     Text(
                         "原频 ${TimingUtils.formatClockCompact(sim.originalClockHz)} (×${String.format(Locale.US, "%.2f", sim.clockMultiplier)})",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                 }
             }
 
             // 若有垂直消隐行数变动
             if (sim.estimatedVfp != null && sim.estimatedVbp != null) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                HorizontalDivider(color = MiuixTheme.colorScheme.outline.copy(alpha = 0.5f))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -226,12 +226,12 @@ fun OverclockPreviewCard(
                 ) {
                     Text(
                         "消隐行数适配",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                     Text(
                         "VFP: ${sim.originalVfp}→${sim.estimatedVfp} 行 · VBP: ${sim.originalVbp}→${sim.estimatedVbp} 行",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Medium
                     )
@@ -243,7 +243,7 @@ fun OverclockPreviewCard(
             val showCalculationNote = sim.calculationNote.isNotBlank()
             if (showRiskDescription || showCalculationNote) {
                 Surface(
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                    color = MiuixTheme.colorScheme.surface.copy(alpha = 0.7f),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -251,7 +251,7 @@ fun OverclockPreviewCard(
                         if (showRiskDescription) {
                             Text(
                                 sim.risk.description,
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MiuixTheme.textStyles.footnote2,
                                 color = riskColor,
                                 fontWeight = FontWeight.Medium
                             )
@@ -259,8 +259,8 @@ fun OverclockPreviewCard(
                         if (showCalculationNote) {
                             Text(
                                 sim.calculationNote,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                         }
                     }
@@ -269,4 +269,3 @@ fun OverclockPreviewCard(
         }
     }
 }
-

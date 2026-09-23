@@ -35,18 +35,6 @@ import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SettingsEthernet
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +50,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import io.mo.dtbooverclocker.core.ActivePanelDetector
 import io.mo.dtbooverclocker.model.TimingCandidate
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class PanelFilterScope(val label: String) {
     DEVICE_ONLY("机型专属"),
@@ -85,7 +81,7 @@ fun TimingCandidateSelector(
     }
 
     if (groups.isEmpty()) {
-        Text("未识别到可调整的 DSI 时序候选", style = MaterialTheme.typography.bodyMedium)
+        Text("未识别到可调整的 DSI 时序候选", style = MiuixTheme.textStyles.body2)
         return
     }
 
@@ -167,8 +163,8 @@ fun TimingCandidateSelector(
         if (activePanelDisplayName != null) {
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+                border = BorderStroke(1.dp, MiuixTheme.colorScheme.primary.copy(alpha = 0.5f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -185,15 +181,15 @@ fun TimingCandidateSelector(
                     Column {
                         Text(
                             "本机正在使用的屏幕：$activePanelDisplayName",
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MiuixTheme.textStyles.subtitle,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MiuixTheme.colorScheme.primary
                         )
                         if (activePanelSource != null) {
                             Text(
                                 "检测来源：$activePanelSource · ",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                         }
                     }
@@ -209,7 +205,8 @@ fun TimingCandidateSelector(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    FilterChip(
+                    MiuixSelectableChip(
+                        text = "机型专属 ($deviceSpecificCount)",
                         selected = filterScope == PanelFilterScope.DEVICE_ONLY,
                         onClick = {
                             filterScope = PanelFilterScope.DEVICE_ONLY
@@ -218,22 +215,17 @@ fun TimingCandidateSelector(
                                 groups[k]?.firstOrNull()?.let { onSelect(it.id) }
                             }
                         },
-                        label = { Text("机型专属 ($deviceSpecificCount)") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Star, contentDescription = null, modifier = Modifier.size(16.dp))
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
+                        leadingIcon = Icons.Default.Star
                     )
 
-                    FilterChip(
+                    MiuixSelectableChip(
+                        text = "全部 (${groups.size})",
                         selected = filterScope == PanelFilterScope.ALL,
-                        onClick = { filterScope = PanelFilterScope.ALL },
-                        label = { Text("全部 (${groups.size})") }
+                        onClick = { filterScope = PanelFilterScope.ALL }
                     )
 
-                    FilterChip(
+                    MiuixSelectableChip(
+                        text = "公版/仿真 (${groups.size - deviceSpecificCount})",
                         selected = filterScope == PanelFilterScope.REFERENCE,
                         onClick = {
                             filterScope = PanelFilterScope.REFERENCE
@@ -241,18 +233,20 @@ fun TimingCandidateSelector(
                                 activeGroupKey = k
                                 groups[k]?.firstOrNull()?.let { onSelect(it.id) }
                             }
-                        },
-                        label = { Text("公版/仿真 (${groups.size - deviceSpecificCount})") }
+                        }
                     )
                 }
             }
 
             // 搜索框（支持搜索 o1, 38, 42, 144 等）
-            OutlinedTextField(
+            TextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("搜索屏幕或时序", maxLines = 1) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                label = "搜索屏幕或时序",
+                useLabelAsPlaceholder = true,
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
+                },
                 trailingIcon = {
                     if (searchQuery.isNotBlank()) {
                         IconButton(onClick = { searchQuery = "" }, modifier = Modifier.size(24.dp)) {
@@ -276,49 +270,46 @@ fun TimingCandidateSelector(
                         val isGroupActive = key == activeGroupKey
                         val isDetectedActive = activePanelIdentifier != null &&
                             ActivePanelDetector.matchPanel(key.panelIdentifier, activePanelIdentifier)
-                        FilterChip(
+                        MiuixChip(
                             selected = isGroupActive,
                             onClick = {
                                 activeGroupKey = key
                                 // 切换面板时自动将选中项设为该面板首个候选
                                 groupCandidates.firstOrNull()?.let { onSelect(it.id) }
                             },
-                            label = {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    if (isDetectedActive) {
-                                        Icon(
-                                            Icons.Default.CheckCircle,
-                                            contentDescription = "本机在用",
-                                            modifier = Modifier.size(15.dp),
-                                            tint = Color(0xFF2E7D32)
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                    } else if (key.isDeviceSpecific) {
-                                        Icon(
-                                            Icons.Default.Star,
-                                            contentDescription = "机型专属",
-                                            modifier = Modifier.size(14.dp),
-                                            tint = if (isGroupActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        Spacer(Modifier.width(4.dp))
-                                    }
-                                    val prefix = if (isDetectedActive) "在用·" else ""
-                                    Text("${key.panelDisplayName} ($prefix${groupCandidates.size}档)")
+                            selectedContainerColor = if (isDetectedActive)
+                                MiuixTheme.colorScheme.primaryContainer
+                            else MiuixTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (isDetectedActive) {
+                                    Icon(
+                                        Icons.Default.CheckCircle,
+                                        contentDescription = "本机在用",
+                                        modifier = Modifier.size(15.dp),
+                                        tint = Color(0xFF2E7D32)
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                } else if (key.isDeviceSpecific) {
+                                    Icon(
+                                        Icons.Default.Star,
+                                        contentDescription = "机型专属",
+                                        modifier = Modifier.size(14.dp),
+                                        tint = if (isGroupActive) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurfaceSecondary
+                                    )
+                                    Spacer(Modifier.width(4.dp))
                                 }
-                            },
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = if (isDetectedActive)
-                                    MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
-                            )
-                        )
+                                val prefix = if (isDetectedActive) "在用·" else ""
+                                Text("${key.panelDisplayName} ($prefix${groupCandidates.size}档)")
+                            }
+                        }
                     }
                 }
             } else {
                 Text(
                     "未搜索到匹配的面板或时序",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary,
                     modifier = Modifier.padding(vertical = 4.dp)
                 )
             }
@@ -327,7 +318,7 @@ fun TimingCandidateSelector(
             val singleKey = groups.keys.first()
             val sample = currentGroupCandidates.firstOrNull()
             Surface(
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -339,13 +330,13 @@ fun TimingCandidateSelector(
                     Icon(
                         Icons.Default.PhoneAndroid,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MiuixTheme.colorScheme.primary,
                         modifier = Modifier.size(22.dp)
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             singleKey.panelDisplayName,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = MiuixTheme.textStyles.title3,
                             fontWeight = FontWeight.Bold
                         )
                         Row(
@@ -354,22 +345,22 @@ fun TimingCandidateSelector(
                         ) {
                             Text(
                                 "DTB[${singleKey.entryIndex}]",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                             if (sample?.hActive != null && sample.vActive != null) {
-                                Text("·", style = MaterialTheme.typography.labelSmall)
+                                Text("·", style = MiuixTheme.textStyles.footnote2)
                                 Text(
                                     "${sample.hActive} × ${sample.vActive} 像素",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                                 )
                             }
-                            Text("·", style = MaterialTheme.typography.labelSmall)
+                            Text("·", style = MiuixTheme.textStyles.footnote2)
                             Text(
                                 "${currentGroupCandidates.size} 个时序档位",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.primary
                             )
                         }
                     }
@@ -380,7 +371,7 @@ fun TimingCandidateSelector(
         // 刷新率档位卡片列表
         Text(
             "选择待超频的原始时序档位：",
-            style = MaterialTheme.typography.labelMedium,
+            style = MiuixTheme.textStyles.footnote1,
             fontWeight = FontWeight.Medium
         )
 
@@ -399,10 +390,10 @@ fun TimingCandidateSelector(
         activeCandidate?.let { cand ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
-                ),
-                shape = RoundedCornerShape(10.dp)
+                cornerRadius = 10.dp,
+                colors = CardDefaults.defaultColors(
+                    color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f)
+                )
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
                     Row(
@@ -417,19 +408,19 @@ fun TimingCandidateSelector(
                                 Icons.Default.SettingsEthernet,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MiuixTheme.colorScheme.primary
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 "底层设备树 (DTS) 节点详情",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MiuixTheme.textStyles.footnote1,
                                 fontWeight = FontWeight.Medium
                             )
                         }
                         Icon(
                             if (showRawDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.outline
+                            tint = MiuixTheme.colorScheme.outline
                         )
                     }
 
@@ -444,13 +435,13 @@ fun TimingCandidateSelector(
                         ) {
                             Text(
                                 "节点路径：",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                             Surface(
-                                color = MaterialTheme.colorScheme.surface,
+                                color = MiuixTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(6.dp),
-                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                                border = BorderStroke(1.dp, MiuixTheme.colorScheme.outline)
                             ) {
                                 Row(
                                     modifier = Modifier
@@ -462,7 +453,7 @@ fun TimingCandidateSelector(
                                         cand.nodePath,
                                         modifier = Modifier.weight(1f),
                                         fontFamily = FontFamily.Monospace,
-                                        style = MaterialTheme.typography.labelSmall
+                                        style = MiuixTheme.textStyles.footnote2
                                     )
                                     IconButton(
                                         onClick = {
@@ -486,14 +477,14 @@ fun TimingCandidateSelector(
                                 Text(
                                     "DTS 范围: [${cand.nodeStart}..${cand.nodeEndExclusive}]",
                                     fontFamily = FontFamily.Monospace,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                                 )
                                 Text(
                                     "来源文件: ${cand.dtsFile.name}",
                                     fontFamily = FontFamily.Monospace,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                                 )
                             }
                         }
@@ -513,22 +504,18 @@ private fun TimingCandidateCard(
     val nodeName = TimingUtils.parseTimingNodeName(candidate.nodePath)
     val clockStr = TimingUtils.formatClockCompact(candidate.pixelClockHz)
 
-    OutlinedCard(
+    Card(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.outlinedCardColors(
-            containerColor = if (selected) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+            .fillMaxWidth(),
+        cornerRadius = 12.dp,
+        colors = CardDefaults.defaultColors(
+            color = if (selected) {
+                MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
             } else {
-                MaterialTheme.colorScheme.surface
+                MiuixTheme.colorScheme.surface
             }
         ),
-        border = BorderStroke(
-            width = if (selected) 2.dp else 1.dp,
-            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-        )
+        onClick = onClick
     ) {
         Row(
             modifier = Modifier
@@ -540,7 +527,7 @@ private fun TimingCandidateCard(
             Icon(
                 if (selected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
                 contentDescription = null,
-                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                tint = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.outline,
                 modifier = Modifier.size(22.dp)
             )
 
@@ -554,18 +541,18 @@ private fun TimingCandidateCard(
                 ) {
                     Text(
                         "${candidate.currentHz} Hz",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MiuixTheme.textStyles.title2,
                         fontWeight = FontWeight.Bold,
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        color = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
                     )
 
                     Surface(
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MiuixTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
                             nodeName,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MiuixTheme.textStyles.footnote2,
                             fontFamily = FontFamily.Monospace,
                             modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                         )
@@ -573,13 +560,13 @@ private fun TimingCandidateCard(
 
                     if (candidate.hasVendorDynamicMode) {
                         Surface(
-                            color = MaterialTheme.colorScheme.errorContainer,
+                            color = MiuixTheme.colorScheme.errorContainer,
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
                                 "自动变频 / idle",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onErrorContainer,
                                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
                             )
                         }
@@ -587,13 +574,13 @@ private fun TimingCandidateCard(
 
                     if (candidate.hasOpaquePanelTimings) {
                         Surface(
-                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            color = MiuixTheme.colorScheme.tertiaryContainer,
                             shape = RoundedCornerShape(4.dp)
                         ) {
                             Text(
                                 "PHY Blob",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onTertiaryContainer,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                             )
                         }
@@ -603,8 +590,8 @@ private fun TimingCandidateCard(
                 if (candidate.hasVendorDynamicMode) {
                     Text(
                         "不建议修改或作为新增模板，请选择同面板的 normal 普通档位。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.error,
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.error,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
@@ -618,27 +605,27 @@ private fun TimingCandidateCard(
                 ) {
                     Text(
                         "Clock: $clockStr",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontFamily = FontFamily.Monospace,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
 
                     if (candidate.hActive != null && candidate.vActive != null) {
                         Text(
                             "${candidate.hActive}×${candidate.vActive}",
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MiuixTheme.textStyles.footnote2,
                             fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
                     }
 
                     Text(
                         if (candidate.hasFullGeometry) "时序完整" else "时序缺省",
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         color = if (candidate.hasFullGeometry) {
-                            MaterialTheme.colorScheme.primary
+                            MiuixTheme.colorScheme.primary
                         } else {
-                            MaterialTheme.colorScheme.outline
+                            MiuixTheme.colorScheme.outline
                         }
                     )
                 }

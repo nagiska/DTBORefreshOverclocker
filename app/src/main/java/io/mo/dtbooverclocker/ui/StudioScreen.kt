@@ -7,7 +7,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.SaveableStateHolder
@@ -19,9 +18,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.model.PatchMode
 import io.mo.dtbooverclocker.model.PatchStrategy
+import io.mo.dtbooverclocker.ui.components.MiuixInfoChip
 import java.io.File
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.NavigationBar
+import top.yukonga.miuix.kmp.basic.NavigationBarItem
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class StudioTab(val label: String, val icon: ImageVector) {
     OVERVIEW("概览", Icons.Default.Dashboard),
@@ -32,7 +46,6 @@ enum class StudioTab(val label: String, val icon: ImageVector) {
 
 private enum class StudioModule { REFRESH_RATE }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StudioScreen(
     state: MainUiState, pagerState: PagerState, pageStateHolder: SaveableStateHolder,
@@ -58,7 +71,6 @@ fun StudioScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StudioNavigation(
     pagerState: PagerState,
@@ -73,8 +85,9 @@ internal fun StudioNavigation(
     var navigationJob by remember { mutableStateOf<Job?>(null) }
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Column { Text("DTBO Studio", fontWeight = FontWeight.SemiBold); Text(selectedTab.label, style = MaterialTheme.typography.labelSmall) } },
+            SmallTopAppBar(
+                title = "DTBO Studio",
+                subtitle = selectedTab.label,
                 actions = {
                     if (selectedTab != StudioTab.SETTINGS) {
                         IconButton(onClick = onOpenRollback, enabled = enabled) { Icon(Icons.Default.Restore, "备份与恢复") }
@@ -91,8 +104,8 @@ internal fun StudioNavigation(
                         navigationJob?.cancel()
                         navigationJob = scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
                     },
-                    icon = { Icon(tab.icon, null) },
-                    label = { Text(tab.label) },
+                    icon = tab.icon,
+                    label = tab.label,
                     enabled = enabled
                 )
             } }
@@ -130,21 +143,21 @@ private fun OverviewTab(
         state.patchReport?.let { report -> item(key = "output") { OutputCard(state, { onSavePatched(report.outputImage) }, onRecoveryZip, onFastbootBundle, onFlash) } }
         state.lastFlash?.let { flash -> item(key = "rescue") { RescueMemoCard(state, onCopy, { onExportBackup(flash.backupFile) }, { onExportRescue(flash.rescueZip) }, onScreenshot) } }
         item(key = "terminal") { TerminalCard(state.logs, onClearLogs) }
-        item(key = "status") { Text(state.status, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(bottom = 24.dp)) }
+        item(key = "status") { Text(state.status, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary, modifier = Modifier.padding(bottom = 24.dp)) }
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StudioHeroCard(state: MainUiState) {
-    Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f))) {
+    Card(Modifier.fillMaxWidth(), colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.55f))) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Android Device Tree Toolkit", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text("导入、分析、编辑、验证并重新构建 DTBO。", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Android Device Tree Toolkit", style = MiuixTheme.textStyles.title1, fontWeight = FontWeight.Bold)
+            Text("导入、分析、编辑、验证并重新构建 DTBO。", color = MiuixTheme.colorScheme.onSurfaceSecondary)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                AssistChip({}, { Text(if (state.rootState.granted) "Root ✓" else "免 Root 可用") })
-                state.slotInfo?.let { AssistChip({}, { Text(it.label) }) }
-                AssistChip({}, { Text(if (state.workspace != null) "工作区已加载" else "等待镜像") })
+                MiuixInfoChip(text = if (state.rootState.granted) "Root ✓" else "免 Root 可用")
+                state.slotInfo?.let { MiuixInfoChip(text = it.label) }
+                MiuixInfoChip(text = if (state.workspace != null) "工作区已加载" else "等待镜像")
             }
         }
     }
@@ -162,18 +175,18 @@ private fun ModulesTab(
     val workspace = state.workspace
     LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Spacer(Modifier.height(2.dp)) }
-        item { Column { Text("功能模块", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold); Text("专用模块负责常见硬件配置；通用修改最终统一落到设备树编辑器。", color = MaterialTheme.colorScheme.onSurfaceVariant) } }
+        item { Column { Text("功能模块", style = MiuixTheme.textStyles.headline1, fontWeight = FontWeight.Bold); Text("专用模块负责常见硬件配置；通用修改最终统一落到设备树编辑器。", color = MiuixTheme.colorScheme.onSurfaceSecondary) } }
         if (workspace == null) {
             item { WorkspaceRequiredCard() }
         } else {
-            item { Text("显示", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+            item { Text("显示", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold) }
             item { FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ModuleCard("刷新率", workspace.candidates.size.toString() + " 个时序候选", Icons.Default.Monitor, workspace.candidates.isNotEmpty(), activeModule == StudioModule.REFRESH_RATE) { activeModule = if (activeModule == StudioModule.REFRESH_RATE) null else StudioModule.REFRESH_RATE }
                 ModuleCard("分辨率", "规划中", Icons.Default.AspectRatio, false)
                 ModuleCard("DSC", "规划中", Icons.Default.Tune, false)
                 ModuleCard("亮度 / HBM", "规划中", Icons.Default.Brightness6, false)
             } }
-            item { Text("硬件", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold) }
+            item { Text("硬件", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold) }
             item { FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ModuleCard("Thermal", "规划中", Icons.Default.Thermostat, false)
                 ModuleCard("Charging", "规划中", Icons.Default.BatteryChargingFull, false)
@@ -191,8 +204,8 @@ private fun ModulesTab(
 
 @Composable
 private fun ModuleCard(title: String, subtitle: String, icon: ImageVector, enabled: Boolean, active: Boolean = false, onClick: () -> Unit = {}) {
-    Card(Modifier.width(164.dp).clickable(enabled = enabled, onClick = onClick), colors = CardDefaults.cardColors(containerColor = if (active) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f))) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Icon(icon, null); Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+    Card(Modifier.width(164.dp).clickable(enabled = enabled, onClick = onClick), colors = CardDefaults.defaultColors(color = if (active) MiuixTheme.colorScheme.primaryContainer else MiuixTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f))) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Icon(icon, null); Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary) }
     }
 }
 
@@ -206,12 +219,12 @@ private fun SettingsHubTab(state: MainUiState, padding: PaddingValues, onRequest
     LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Spacer(Modifier.height(2.dp)) }
         item { Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("环境状态", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("环境状态", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
             Text(if (state.rootState.granted) "Root 已授权" else state.rootState.detail)
-            Text(state.slotInfo?.blockDevice ?: "分区路径检测中", fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
+            Text(state.slotInfo?.blockDevice ?: "分区路径检测中", fontFamily = FontFamily.Monospace, style = MiuixTheme.textStyles.footnote1)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (!state.rootState.granted) OutlinedButton(onRequestRoot, enabled = state.rootState.suPresent) { Icon(Icons.Default.Lock, null); Spacer(Modifier.width(6.dp)); Text("请求 Root") }
-                OutlinedButton(onRefreshEnvironment) { Icon(Icons.Default.Refresh, null); Spacer(Modifier.width(6.dp)); Text("重新探测") }
+                if (!state.rootState.granted) Button(onRequestRoot, enabled = state.rootState.suPresent, colors = ButtonDefaults.buttonColors()) { Icon(Icons.Default.Lock, null); Spacer(Modifier.width(6.dp)); Text("请求 Root") }
+                Button(onRefreshEnvironment, colors = ButtonDefaults.buttonColors()) { Icon(Icons.Default.Refresh, null); Spacer(Modifier.width(6.dp)); Text("重新探测") }
             }
         } } }
         item { SettingsEntry(Icons.Default.Restore, "备份与恢复", "已保存 " + state.backups.size + " 个 DTBO 备份", onOpenRollback) }
@@ -223,7 +236,7 @@ private fun SettingsHubTab(state: MainUiState, padding: PaddingValues, onRequest
 @Composable
 private fun SettingsEntry(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) { Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Surface(shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.size(44.dp)) { Box(contentAlignment = Alignment.Center) { Icon(icon, null) } }
-        Spacer(Modifier.width(14.dp)); Column { Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Surface(shape = RoundedCornerShape(10.dp), color = MiuixTheme.colorScheme.primaryContainer, modifier = Modifier.size(44.dp)) { Box(contentAlignment = Alignment.Center) { Icon(icon, null) } }
+        Spacer(Modifier.width(14.dp)); Column { Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary) }
     } }
 }

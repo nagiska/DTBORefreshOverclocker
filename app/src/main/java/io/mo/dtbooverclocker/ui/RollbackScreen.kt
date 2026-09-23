@@ -36,24 +36,6 @@ import androidx.compose.material.icons.filled.HistoryEdu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -68,14 +50,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.model.BackupRecord
 import io.mo.dtbooverclocker.model.BackupType
 import io.mo.dtbooverclocker.model.BackupVerificationState
 import io.mo.dtbooverclocker.model.BackupVerificationStatus
 import io.mo.dtbooverclocker.util.StorageUtils
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RollbackScreen(
     state: MainUiState,
@@ -97,17 +93,9 @@ fun RollbackScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("镜像回滚", fontWeight = FontWeight.SemiBold)
-                        Text(
-                            "DTBO 分区备份时间轴与还原",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
+            SmallTopAppBar(
+                title = "镜像回滚",
+                subtitle = "DTBO 分区备份时间轴与还原",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -179,151 +167,161 @@ fun RollbackScreen(
     // Manual Backup Dialog
     if (showManualBackupDialog) {
         var manualDesc by remember { mutableStateOf("") }
-        AlertDialog(
-            onDismissRequest = { showManualBackupDialog = false },
-            title = { Text("手动备份当前 DTBO 镜像") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "将通过 Root 读取当前活跃分区 (${state.slotInfo?.blockDevice ?: "未检测到槽位"}) 并保存为回滚镜像。",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    OutlinedTextField(
-                        value = manualDesc,
-                        onValueChange = { manualDesc = it },
-                        label = { Text("备份说明备注（可选）") },
-                        placeholder = { Text("例如：刷入 144Hz 前的原厂基准") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            },
-            confirmButton = {
+        WindowDialog(
+            show = true,
+            title = "手动备份当前 DTBO 镜像",
+            onDismissRequest = { showManualBackupDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "将通过 Root 读取当前活跃分区 (${state.slotInfo?.blockDevice ?: "未检测到槽位"}) 并保存为回滚镜像。",
+                    style = MiuixTheme.textStyles.body2
+                )
+                TextField(
+                    value = manualDesc,
+                    onValueChange = { manualDesc = it },
+                    label = "备份说明备注（可选）",
+                    modifier = Modifier.fillMaxWidth()
+                )
                 Button(
                     onClick = {
                         showManualBackupDialog = false
                         onManualBackup(manualDesc)
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColorsPrimary()
                 ) {
                     Text("立即备份")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showManualBackupDialog = false }) {
+                Button(
+                    onClick = { showManualBackupDialog = false },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 
     // Dangerous Flash Rollback Confirmation Dialog
     pendingFlashRecord?.let { record ->
-        AlertDialog(
-            onDismissRequest = { pendingFlashRecord = null },
-            icon = {
-                Icon(
-                    Icons.Default.Warning,
-                    contentDescription = "高风险警示",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            },
-            title = {
-                Text(
-                    "确认回滚刷入 DTBO 镜像？",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        "您即将把选定的备份镜像物理写入设备分区，此操作将覆盖当前的 DTBO 分区！",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold
+        WindowDialog(
+            show = true,
+            title = "确认回滚刷入 DTBO 镜像？",
+            onDismissRequest = { pendingFlashRecord = null }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Warning,
+                        contentDescription = "高风险警示",
+                        tint = MiuixTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
                     )
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.35f)
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text("• 目标分区：${state.slotInfo?.blockDevice ?: record.blockDevice}", style = MaterialTheme.typography.bodySmall)
-                            Text("• 备份文件：${record.fileName}", style = MaterialTheme.typography.bodySmall)
-                            Text("• 备份时间：${record.formattedTime}", style = MaterialTheme.typography.bodySmall)
-                            Text("• 备份系统：${record.androidVersion}", style = MaterialTheme.typography.bodySmall)
-                            Text("• 系统版本：${record.buildDisplay}", style = MaterialTheme.typography.bodySmall)
-                            Text("• 记录 MD5：${record.recordedMd5}", style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
-                        }
-                    }
+                    Spacer(Modifier.width(8.dp))
                     Text(
-                        "写入后系统将自动进行写后回读 MD5 校验以确保完整性。请确保电量充足，刷写过程中请勿断电或重启手机。",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        "此操作将覆盖当前的 DTBO 分区",
+                        style = MiuixTheme.textStyles.title3,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MiuixTheme.colorScheme.error
                     )
                 }
-            },
-            confirmButton = {
+                Text(
+                    "您即将把选定的备份镜像物理写入设备分区，此操作将覆盖当前的 DTBO 分区！",
+                    style = MiuixTheme.textStyles.body2,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Card(
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.errorContainer.copy(alpha = 0.35f)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text("• 目标分区：${state.slotInfo?.blockDevice ?: record.blockDevice}", style = MiuixTheme.textStyles.footnote1)
+                        Text("• 备份文件：${record.fileName}", style = MiuixTheme.textStyles.footnote1)
+                        Text("• 备份时间：${record.formattedTime}", style = MiuixTheme.textStyles.footnote1)
+                        Text("• 备份系统：${record.androidVersion}", style = MiuixTheme.textStyles.footnote1)
+                        Text("• 系统版本：${record.buildDisplay}", style = MiuixTheme.textStyles.footnote1)
+                        Text("• 记录 MD5：${record.recordedMd5}", style = MiuixTheme.textStyles.footnote1, fontFamily = FontFamily.Monospace)
+                    }
+                }
+                Text(
+                    "写入后系统将自动进行写后回读 MD5 校验以确保完整性。请确保电量充足，刷写过程中请勿断电或重启手机。",
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary
+                )
                 Button(
                     onClick = {
                         val target = record
                         pendingFlashRecord = null
                         onFlashBackup(target)
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("确认回滚刷入")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingFlashRecord = null }) {
+                Button(
+                    onClick = { pendingFlashRecord = null },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 
     // Delete Confirmation Dialog
     pendingDeleteRecord?.let { record ->
-        AlertDialog(
-            onDismissRequest = { pendingDeleteRecord = null },
-            icon = {
-                Icon(
-                    Icons.Default.DeleteOutline,
-                    contentDescription = "删除确认",
-                    tint = MaterialTheme.colorScheme.error
-                )
-            },
-            title = { Text("删除此备份？") },
-            text = {
+        WindowDialog(
+            show = true,
+            title = "删除此备份？",
+            onDismissRequest = { pendingDeleteRecord = null }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.DeleteOutline,
+                        contentDescription = "删除确认",
+                        tint = MiuixTheme.colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text("本地文件与元数据将永久移除", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
+                }
                 Text("确定要删除镜像 ${record.fileName} 吗？删除后本地文件与元数据将永久移除，无法再用于一键回滚。")
-            },
-            confirmButton = {
                 Button(
                     onClick = {
                         val target = record
                         pendingDeleteRecord = null
                         onDeleteBackup(target)
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error,
-                        contentColor = MaterialTheme.colorScheme.onError
-                    )
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("确认删除")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { pendingDeleteRecord = null }) {
+                Button(
+                    onClick = { pendingDeleteRecord = null },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 }
 
@@ -336,8 +334,8 @@ private fun RollbackHeaderCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
         )
     ) {
         Column(
@@ -350,32 +348,33 @@ private fun RollbackHeaderCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("备份镜像库", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    Text("备份镜像库", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.Bold)
                     Text(
                         "当前槽位: $slotLabel ($blockDevice)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MiuixTheme.textStyles.footnote1,
+                        color = MiuixTheme.colorScheme.onSurfaceSecondary
                     )
                 }
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.primaryContainer
+                    color = MiuixTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         text = "共 $totalCount 个备份",
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MiuixTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
 
             Spacer(Modifier.height(4.dp))
 
-            FilledTonalButton(
+            Button(
                 onClick = onManualBackupClick,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors()
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
@@ -410,7 +409,7 @@ private fun TimelineBackupItem(
         ) {
             // Milestone node
             val isAuto = record.backupType == BackupType.AUTO
-            val nodeColor = if (isAuto) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+            val nodeColor = if (isAuto) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.secondary
             val nodeIcon = if (isAuto) Icons.Default.AutoAwesome else Icons.Default.TouchApp
 
             Box(
@@ -423,7 +422,7 @@ private fun TimelineBackupItem(
                 Icon(
                     nodeIcon,
                     contentDescription = record.backupType.displayName,
-                    tint = MaterialTheme.colorScheme.onPrimary,
+                    tint = MiuixTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -434,7 +433,7 @@ private fun TimelineBackupItem(
                     modifier = Modifier
                         .width(2.dp)
                         .weight(1f)
-                        .background(MaterialTheme.colorScheme.outlineVariant)
+                        .background(MiuixTheme.colorScheme.outline)
                 )
             }
         }
@@ -448,8 +447,7 @@ private fun TimelineBackupItem(
                 .padding(bottom = if (isLast) 12.dp else 20.dp)
         ) {
             Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.padding(14.dp),
@@ -464,28 +462,28 @@ private fun TimelineBackupItem(
                         Surface(
                             shape = RoundedCornerShape(6.dp),
                             color = if (record.backupType == BackupType.AUTO) {
-                                MaterialTheme.colorScheme.primaryContainer
+                                MiuixTheme.colorScheme.primaryContainer
                             } else {
-                                MaterialTheme.colorScheme.secondaryContainer
+                                MiuixTheme.colorScheme.secondaryContainer
                             }
                         ) {
                             Text(
                                 text = record.backupType.displayName,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MiuixTheme.textStyles.footnote2,
                                 fontWeight = FontWeight.Bold,
                                 color = if (record.backupType == BackupType.AUTO) {
-                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                    MiuixTheme.colorScheme.onPrimaryContainer
                                 } else {
-                                    MaterialTheme.colorScheme.onSecondaryContainer
+                                    MiuixTheme.colorScheme.onSecondaryContainer
                                 }
                             )
                         }
 
                         Text(
                             text = record.formattedTime,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MiuixTheme.textStyles.footnote2,
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
                     }
 
@@ -493,14 +491,14 @@ private fun TimelineBackupItem(
                     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                         Text(
                             text = record.fileName,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MiuixTheme.textStyles.body2,
                             fontWeight = FontWeight.SemiBold
                         )
                         if (record.description.isNotBlank()) {
                             Text(
                                 text = record.description,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                         }
                     }
@@ -508,7 +506,7 @@ private fun TimelineBackupItem(
                     // Metadata details box
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -526,7 +524,7 @@ private fun TimelineBackupItem(
                     // MD5 Verification Section
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
+                        color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -544,12 +542,12 @@ private fun TimelineBackupItem(
                                 ) {
                                     Text(
                                         text = "MD5: ",
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MiuixTheme.textStyles.footnote2,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
                                         text = record.recordedMd5,
-                                        style = MaterialTheme.typography.labelSmall,
+                                        style = MiuixTheme.textStyles.footnote2,
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }
@@ -575,8 +573,8 @@ private fun TimelineBackupItem(
                                     BackupVerificationStatus.UNCHECKED -> {
                                         Text(
                                             text = "未校验完整性",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            style = MiuixTheme.textStyles.footnote2,
+                                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                                         )
                                     }
                                     BackupVerificationStatus.VERIFYING -> {
@@ -587,8 +585,8 @@ private fun TimelineBackupItem(
                                             CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
                                             Text(
                                                 text = "正在校验 MD5…",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.primary
+                                                style = MiuixTheme.textStyles.footnote2,
+                                                color = MiuixTheme.colorScheme.primary
                                             )
                                         }
                                     }
@@ -605,7 +603,7 @@ private fun TimelineBackupItem(
                                             )
                                             Text(
                                                 text = "MD5 校验通过 (一致)",
-                                                style = MaterialTheme.typography.labelSmall,
+                                                style = MiuixTheme.textStyles.footnote2,
                                                 fontWeight = FontWeight.SemiBold,
                                                 color = Color(0xFF2E7D32)
                                             )
@@ -619,14 +617,14 @@ private fun TimelineBackupItem(
                                             Icon(
                                                 Icons.Default.Error,
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.error,
+                                                tint = MiuixTheme.colorScheme.error,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
                                                 text = verificationState.message ?: "MD5 不一致",
-                                                style = MaterialTheme.typography.labelSmall,
+                                                style = MiuixTheme.textStyles.footnote2,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.error
+                                                color = MiuixTheme.colorScheme.error
                                             )
                                         }
                                     }
@@ -638,26 +636,27 @@ private fun TimelineBackupItem(
                                             Icon(
                                                 Icons.Default.Warning,
                                                 contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.error,
+                                                tint = MiuixTheme.colorScheme.error,
                                                 modifier = Modifier.size(16.dp)
                                             )
                                             Text(
                                                 text = "备份镜像文件已丢失",
-                                                style = MaterialTheme.typography.labelSmall,
+                                                style = MiuixTheme.textStyles.footnote2,
                                                 fontWeight = FontWeight.SemiBold,
-                                                color = MaterialTheme.colorScheme.error
+                                                color = MiuixTheme.colorScheme.error
                                             )
                                         }
                                     }
                                 }
 
-                                OutlinedButton(
+                                Button(
                                     onClick = onVerifyMd5,
                                     enabled = verificationState.status != BackupVerificationStatus.VERIFYING,
-                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.dp),
-                                    modifier = Modifier.height(30.dp)
+                                    insideMargin = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    minHeight = 30.dp,
+                                    colors = ButtonDefaults.buttonColors()
                                 ) {
-                                    Text("验证 MD5", style = MaterialTheme.typography.labelSmall)
+                                    Text("验证 MD5", style = MiuixTheme.textStyles.footnote2)
                                 }
                             }
                         }
@@ -669,41 +668,43 @@ private fun TimelineBackupItem(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        OutlinedButton(
+                        Button(
                             onClick = onExport,
                             modifier = Modifier.weight(1f),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                            insideMargin = PaddingValues(horizontal = 6.dp, vertical = 4.dp),
+                            colors = ButtonDefaults.buttonColors()
                         ) {
                             Icon(Icons.Default.FileDownload, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("导出", style = MaterialTheme.typography.labelSmall)
+                            Text("导出", style = MiuixTheme.textStyles.footnote2)
                         }
 
                         Button(
                             onClick = onFlash,
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
+                            colors = ButtonDefaults.buttonColorsPrimary(
+                                color = MiuixTheme.colorScheme.error,
+                                contentColor = MiuixTheme.colorScheme.onError
                             ),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                            insideMargin = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                         ) {
                             Icon(Icons.Default.FlashOn, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("刷入", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+                            Text("刷入", style = MiuixTheme.textStyles.footnote2, fontWeight = FontWeight.Bold)
                         }
 
-                        OutlinedButton(
+                        Button(
                             onClick = onDelete,
                             modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error
+                            colors = ButtonDefaults.buttonColors(
+                                color = Color.Transparent,
+                                contentColor = MiuixTheme.colorScheme.error
                             ),
-                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                            insideMargin = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
                         ) {
                             Icon(Icons.Default.DeleteOutline, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("删除", style = MaterialTheme.typography.labelSmall)
+                            Text("删除", style = MiuixTheme.textStyles.footnote2)
                         }
                     }
                 }
@@ -720,12 +721,12 @@ private fun InfoRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = MiuixTheme.textStyles.footnote2,
+            color = MiuixTheme.colorScheme.onSurfaceSecondary
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.labelSmall,
+            style = MiuixTheme.textStyles.footnote2,
             fontWeight = FontWeight.Medium
         )
     }
@@ -745,28 +746,30 @@ private fun EmptyRollbackState(
             Icons.Default.HistoryEdu,
             contentDescription = null,
             modifier = Modifier.size(72.dp),
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+            tint = MiuixTheme.colorScheme.primary.copy(alpha = 0.6f)
         )
         Spacer(Modifier.height(16.dp))
         Text(
             text = "暂无备份镜像",
-            style = MaterialTheme.typography.titleMedium,
+            style = MiuixTheme.textStyles.title2,
             fontWeight = FontWeight.Bold
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = "在直接刷入超频镜像前，系统会自动备份当前活跃槽位分区；您也可以随时手动备份当前手机 DTBO 分区以便日后回滚。",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            style = MiuixTheme.textStyles.body2,
+            color = MiuixTheme.colorScheme.onSurfaceSecondary,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(Modifier.height(24.dp))
-        Button(onClick = onManualBackupClick) {
+        Button(
+            onClick = onManualBackupClick,
+            colors = ButtonDefaults.buttonColorsPrimary()
+        ) {
             Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text("立即手动备份当前镜像")
         }
     }
 }
-

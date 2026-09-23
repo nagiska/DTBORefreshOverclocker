@@ -30,22 +30,6 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Security
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,14 +38,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.BuildConfig
+import io.mo.dtbooverclocker.ui.components.MiuixInfoChip
 import io.mo.dtbooverclocker.util.StorageUtils
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     state: MainUiState,
@@ -88,8 +87,8 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("设置", fontWeight = FontWeight.SemiBold) },
+            SmallTopAppBar(
+                title = "设置",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -119,10 +118,9 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.surface
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -135,11 +133,11 @@ fun SettingsScreen(
                             Icon(
                                 Icons.Default.Security,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MiuixTheme.colorScheme.primary
                             )
                             Text(
                                 "环境状态",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MiuixTheme.textStyles.title2,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -148,26 +146,20 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            AssistChip(
-                                onClick = {},
-                                label = {
-                                    Text(if (state.rootState.granted) "Root 已授权 (自动保持)" else state.rootState.detail)
-                                },
-                                leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) }
+                            MiuixInfoChip(
+                                text = if (state.rootState.granted) "Root 已授权 (自动保持)" else state.rootState.detail,
+                                leadingIcon = Icons.Default.Lock
                             )
                             state.slotInfo?.let { slot ->
-                                AssistChip(
-                                    onClick = {},
-                                    label = { Text(slot.label) }
-                                )
+                                MiuixInfoChip(text = slot.label)
                             }
                         }
 
                         Text(
                             text = state.slotInfo?.blockDevice ?: "分区路径：检测中",
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MiuixTheme.textStyles.footnote1,
                             fontFamily = FontFamily.Monospace,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
 
                         Row(
@@ -175,18 +167,20 @@ fun SettingsScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             if (!state.rootState.granted) {
-                                OutlinedButton(
+                                Button(
                                     onClick = onRequestRoot,
                                     enabled = state.rootState.suPresent,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors()
                                 ) {
                                     Text("请求 Root 授权")
                                 }
                             }
 
-                            OutlinedButton(
+                            Button(
                                 onClick = onRefreshEnvironment,
-                                modifier = if (!state.rootState.granted) Modifier.weight(1f) else Modifier.fillMaxWidth()
+                                modifier = if (!state.rootState.granted) Modifier.weight(1f) else Modifier.fillMaxWidth(),
+                                colors = ButtonDefaults.buttonColors()
                             ) {
                                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(6.dp))
@@ -203,10 +197,9 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = onNavigateToRollback),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.surface
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -221,14 +214,14 @@ fun SettingsScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = MiuixTheme.colorScheme.primaryContainer,
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         Icons.Default.Restore,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        tint = MiuixTheme.colorScheme.onPrimaryContainer,
                                         modifier = Modifier.size(22.dp)
                                     )
                                 }
@@ -237,13 +230,13 @@ fun SettingsScreen(
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(
                                     "镜像备份与回滚管理",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MiuixTheme.textStyles.title2,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     "已存储 ${state.backups.size} 个备份 · 查看时间轴与一键还原",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MiuixTheme.textStyles.footnote1,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                                 )
                             }
                         }
@@ -251,7 +244,7 @@ fun SettingsScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = "查看备份",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = MiuixTheme.colorScheme.onSurfaceSecondary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -262,10 +255,9 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.surface
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -283,44 +275,45 @@ fun SettingsScreen(
                                 Icon(
                                     Icons.Default.CleaningServices,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MiuixTheme.colorScheme.primary
                                 )
                                 Text(
                                     "应用缓存",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MiuixTheme.textStyles.title2,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
 
                             Surface(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                color = MiuixTheme.colorScheme.secondaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     text = StorageUtils.formatFileSize(state.cacheSizeBytes),
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MiuixTheme.textStyles.footnote1,
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = MiuixTheme.colorScheme.onSecondaryContainer
                                 )
                             }
                         }
 
                         Text(
                             text = "包含导入的 DTBO 镜像缓存、反编译 DTS 临时工作区及刷写校验临时文件。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MiuixTheme.textStyles.footnote1,
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
-                            OutlinedButton(
+                            Button(
                                 onClick = { showClearCacheDialog = true },
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
+                                colors = ButtonDefaults.buttonColors(
+                                    color = Color.Transparent,
+                                    contentColor = MiuixTheme.colorScheme.error
                                 )
                             ) {
                                 Icon(
@@ -340,10 +333,9 @@ fun SettingsScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.surface
+                    )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
@@ -361,26 +353,26 @@ fun SettingsScreen(
                                 Icon(
                                     Icons.AutoMirrored.Filled.Article,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
+                                    tint = MiuixTheme.colorScheme.primary
                                 )
                                 Text(
                                     "运行日志",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MiuixTheme.textStyles.title2,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
 
                             Surface(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                color = MiuixTheme.colorScheme.secondaryContainer,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
                                     text = "${state.logFilesCount} 个文件 · ${StorageUtils.formatFileSize(state.logFilesSizeBytes)}",
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MiuixTheme.textStyles.footnote1,
                                     fontFamily = FontFamily.Monospace,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    color = MiuixTheme.colorScheme.onSecondaryContainer
                                 )
                             }
                         }
@@ -391,7 +383,8 @@ fun SettingsScreen(
                         ) {
                             Button(
                                 onClick = onExportLogs,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColorsPrimary()
                             ) {
                                 Icon(
                                     Icons.Default.FileDownload,
@@ -402,10 +395,11 @@ fun SettingsScreen(
                                 Text("导出完整日志")
                             }
 
-                            OutlinedButton(
+                            Button(
                                 onClick = { showClearLogsDialog = true },
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = MaterialTheme.colorScheme.error
+                                colors = ButtonDefaults.buttonColors(
+                                    color = Color.Transparent,
+                                    contentColor = MiuixTheme.colorScheme.error
                                 )
                             ) {
                                 Icon(
@@ -427,10 +421,9 @@ fun SettingsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable(onClick = onNavigateToAbout),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    colors = CardDefaults.defaultColors(
+                        color = MiuixTheme.colorScheme.surface
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -445,14 +438,14 @@ fun SettingsScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(10.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
+                                color = MiuixTheme.colorScheme.primaryContainer,
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         Icons.Default.Info,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        tint = MiuixTheme.colorScheme.onPrimaryContainer,
                                         modifier = Modifier.size(22.dp)
                                     )
                                 }
@@ -461,13 +454,13 @@ fun SettingsScreen(
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(
                                     "关于应用",
-                                    style = MaterialTheme.typography.titleMedium,
+                                    style = MiuixTheme.textStyles.title2,
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Text(
                                     "DTBO Refresh Overclocker v${BuildConfig.VERSION_NAME}",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    style = MiuixTheme.textStyles.footnote1,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                                 )
                             }
                         }
@@ -475,7 +468,7 @@ fun SettingsScreen(
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowForwardIos,
                             contentDescription = "查看详情",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = MiuixTheme.colorScheme.onSurfaceSecondary,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -488,23 +481,16 @@ fun SettingsScreen(
 
     // Clear Cache Confirmation Dialog
     if (showClearCacheDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearCacheDialog = false },
-            icon = {
-                Icon(
-                    Icons.Default.CleaningServices,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            title = { Text("确认清空应用缓存？") },
-            text = {
+        WindowDialog(
+            show = true,
+            title = "确认清空应用缓存？",
+            onDismissRequest = { showClearCacheDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "将清除当前应用内的所有导入镜像缓存与反编译工作目录（当前占用：${StorageUtils.formatFileSize(state.cacheSizeBytes)}）。\n\n" +
                             "若当前有正在编辑但尚未导出的 DTBO 工作区，清理后工作区将被重置。"
                 )
-            },
-            confirmButton = {
                 Button(
                     onClick = {
                         showClearCacheDialog = false
@@ -517,40 +503,37 @@ fun SettingsScreen(
                             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("清空")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearCacheDialog = false }) {
+                Button(
+                    onClick = { showClearCacheDialog = false },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 
     // Clear Logs Confirmation Dialog
     if (showClearLogsDialog) {
-        AlertDialog(
-            onDismissRequest = { showClearLogsDialog = false },
-            icon = {
-                Icon(
-                    Icons.AutoMirrored.Filled.Article,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            },
-            title = { Text("确认清空所有运行日志？") },
-            text = {
+        WindowDialog(
+            show = true,
+            title = "确认清空所有运行日志？",
+            onDismissRequest = { showClearLogsDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     "将删除设备中保存的历史会话日志（当前：${state.logFilesCount} 个文件，共 ${StorageUtils.formatFileSize(state.logFilesSizeBytes)}）。\n\n" +
                             "清空后将自动开启新的空白会话。"
                 )
-            },
-            confirmButton = {
                 Button(
                     onClick = {
                         showClearLogsDialog = false
@@ -558,18 +541,22 @@ fun SettingsScreen(
                             Toast.makeText(context, "日志文件已清空", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("清空")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearLogsDialog = false }) {
+                Button(
+                    onClick = { showClearLogsDialog = false },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 }

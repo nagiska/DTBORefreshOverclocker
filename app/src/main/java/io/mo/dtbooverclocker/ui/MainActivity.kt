@@ -64,33 +64,6 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
 import java.util.Locale
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -117,14 +90,34 @@ import io.mo.dtbooverclocker.model.SourceMode
 import io.mo.dtbooverclocker.model.StagedChange
 import io.mo.dtbooverclocker.model.TimingCandidate
 import io.mo.dtbooverclocker.ui.components.DisclaimerDialog
+import io.mo.dtbooverclocker.ui.components.MiuixChip
+import io.mo.dtbooverclocker.ui.components.MiuixInfoChip
+import io.mo.dtbooverclocker.ui.components.MiuixSelectableChip
 import io.mo.dtbooverclocker.ui.components.OverclockPreviewCard
 import io.mo.dtbooverclocker.ui.components.TimingCandidateSelector
 import io.mo.dtbooverclocker.ui.components.TimingGeometryChart
 import io.mo.dtbooverclocker.ui.components.TimingUtils
+import io.mo.dtbooverclocker.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.CircularProgressIndicator
+import top.yukonga.miuix.kmp.basic.HorizontalDivider
+import top.yukonga.miuix.kmp.basic.Icon
+import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.Slider
+import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.TextButton
+import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.window.WindowDialog
 import java.io.File
 
 enum class AppScreen {
@@ -146,7 +139,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DtboOverclockerApp(viewModel: MainViewModel = viewModel()) {
     val state by viewModel.state.collectAsState()
@@ -318,13 +310,13 @@ private fun DtboOverclockerApp(viewModel: MainViewModel = viewModel()) {
                 onClearLogs = viewModel::clearLogs
             )
         }
-}
+    }
 
     if (state.busy) {
         Box(
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.28f)),
+                .background(Color.Black.copy(alpha = 0.32f)),
             contentAlignment = Alignment.Center
         ) {
             Card {
@@ -372,14 +364,15 @@ internal fun SourceCard(
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("镜像来源", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("镜像来源", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
                     onClick = onImport,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColorsPrimary()
                 ) {
                     Icon(Icons.Default.FolderOpen, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
@@ -388,7 +381,8 @@ internal fun SourceCard(
                 Button(
                     onClick = onExtract,
                     enabled = state.rootState.suPresent,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors()
                 ) {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
@@ -399,14 +393,14 @@ internal fun SourceCard(
             if (!state.rootState.suPresent) {
                 Text(
                     "未检测到 Root 权限，可点击“手动导入”选择外部 dtbo.img 文件。",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                 )
             } else {
                 Text(
                     "手动导入支持外部镜像（免 Root）；提取当前分区只读取 ${state.slotInfo?.blockDevice ?: "当前 dtbo"}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MiuixTheme.textStyles.footnote1,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary
                 )
             }
         }
@@ -429,15 +423,15 @@ internal fun ImageSummaryCard(state: MainUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("镜像解析结果", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text("镜像解析结果", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
                 Surface(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = MiuixTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(6.dp)
                 ) {
                     Text(
                         "DTBO v${workspace.metadata.version}",
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MiuixTheme.textStyles.footnote2,
                         fontFamily = FontFamily.Monospace
                     )
                 }
@@ -447,32 +441,15 @@ internal fun ImageSummaryCard(state: MainUiState) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                AssistChip(
-                    onClick = {},
-                    label = { Text("DTB: ${workspace.metadata.entries.size}") }
+                MiuixInfoChip(text = "DTB: ${workspace.metadata.entries.size}")
+                MiuixInfoChip(
+                    text = if (devCount > 0) "屏幕面板: $panelCount (机型专属: $devCount)" else "屏幕面板: $panelCount"
                 )
-                AssistChip(
-                    onClick = {},
-                    label = {
-                        Text(if (devCount > 0) "屏幕面板: $panelCount (机型专属: $devCount)" else "屏幕面板: $panelCount")
-                    }
-                )
-                AssistChip(
-                    onClick = {},
-                    label = { Text("时序候选: ${workspace.candidates.size}") }
-                )
+                MiuixInfoChip(text = "时序候选: ${workspace.candidates.size}")
                 if (state.activePanelDisplayName != null) {
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("在用: ${state.activePanelDisplayName}") },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = Color(0xFF2E7D32),
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
+                    MiuixInfoChip(
+                        text = "在用: ${state.activePanelDisplayName}",
+                        leadingIcon = Icons.Default.CheckCircle
                     )
                 }
             }
@@ -480,16 +457,16 @@ internal fun ImageSummaryCard(state: MainUiState) {
             if (devCount > 0) {
                 Text(
                     "检测到 $devCount 个机型专属面板（如 O1-38 / O1-42），其余 ${panelCount - devCount} 个为高通公版/仿真测试屏节点，已优先为您展示机型屏幕。",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.primary
                 )
             }
 
             Text(
                 workspace.inputImage.name,
-                style = MaterialTheme.typography.bodySmall,
+                style = MiuixTheme.textStyles.footnote1,
                 fontFamily = FontFamily.Monospace,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MiuixTheme.colorScheme.onSurfaceSecondary
             )
         }
     }
@@ -527,18 +504,18 @@ internal fun TimingPanel(
             ) {
                 Text(
                     "参数微调与超频推演",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MiuixTheme.textStyles.title2,
                     fontWeight = FontWeight.SemiBold
                 )
                 Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = MiuixTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
                         "${workspace.candidates.size} 个候选",
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        style = MiuixTheme.textStyles.footnote2,
+                        color = MiuixTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
@@ -557,35 +534,32 @@ internal fun TimingPanel(
 
             // 2. 操作模式选择（编辑修改档位 vs 新增独立档位 vs 删除指定档位）
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("操作模式", style = MaterialTheme.typography.labelLarge)
+                Text("操作模式", style = MiuixTheme.textStyles.subtitle)
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     PatchMode.entries.forEach { mode ->
-                        FilterChip(
+                        MiuixSelectableChip(
+                            text = mode.displayName,
                             selected = state.patchMode == mode,
                             onClick = { onPatchMode(mode) },
-                            label = { Text(mode.displayName) },
-                            leadingIcon = {
-                                Icon(
-                                    when (mode) {
-                                        PatchMode.APPEND_NEW -> Icons.Default.Add
-                                        PatchMode.DELETE_EXISTING -> Icons.Default.Delete
-                                        PatchMode.OVERWRITE_EXISTING -> Icons.Default.Build
-                                    },
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = if (mode == PatchMode.DELETE_EXISTING && state.patchMode == mode)
-                                        MaterialTheme.colorScheme.error
-                                    else MaterialTheme.colorScheme.onSurface
-                                )
-                            }
+                            leadingIcon = when (mode) {
+                                PatchMode.APPEND_NEW -> Icons.Default.Add
+                                PatchMode.DELETE_EXISTING -> Icons.Default.Delete
+                                PatchMode.OVERWRITE_EXISTING -> Icons.Default.Build
+                            },
+                            selectedContainerColor = if (mode == PatchMode.DELETE_EXISTING && state.patchMode == mode)
+                                MiuixTheme.colorScheme.errorContainer
+                            else MiuixTheme.colorScheme.primaryContainer,
+                            selectedContentColor = if (mode == PatchMode.DELETE_EXISTING && state.patchMode == mode)
+                                MiuixTheme.colorScheme.onErrorContainer
+                            else MiuixTheme.colorScheme.onPrimaryContainer
                         )
                     }
                 }
-                Text(state.patchMode.description, style = MaterialTheme.typography.bodySmall)
+                Text(state.patchMode.description, style = MiuixTheme.textStyles.footnote1)
             }
 
             HorizontalDivider()
@@ -594,53 +568,53 @@ internal fun TimingPanel(
                 // 删除档位专属警告与详情卡片
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (canDelete)
-                            MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.45f)
+                    cornerRadius = 12.dp,
+                    colors = CardDefaults.defaultColors(
+                        color = if (canDelete)
+                            MiuixTheme.colorScheme.errorContainer.copy(alpha = 0.45f)
                         else
-                            MaterialTheme.colorScheme.errorContainer
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+                            MiuixTheme.colorScheme.errorContainer
+                    )
                 ) {
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 Icons.Default.Warning,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error,
+                                tint = MiuixTheme.colorScheme.error,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 "准备删除时序档位",
-                                style = MaterialTheme.typography.titleSmall,
+                                style = MiuixTheme.textStyles.title3,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
+                                color = MiuixTheme.colorScheme.error
                             )
                         }
                         Text(
                             "待删除节点：${TimingUtils.parseTimingNodeName(selected.nodePath)} (${selected.currentHz} Hz)",
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MiuixTheme.textStyles.body2,
                             fontWeight = FontWeight.Medium
                         )
                         Text(
                             "完整节点路径：${selected.nodePath}",
                             fontFamily = FontFamily.Monospace,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MiuixTheme.textStyles.footnote2,
+                            color = MiuixTheme.colorScheme.onSurfaceSecondary
                         )
                         if (!canDelete) {
                             Text(
                                 "⚠ 严防黑屏限制：当前 DTB 镜像条目仅存此单一档位。屏幕面板必须保留至少 1 个时序档位以供显示驱动初始化，禁止删除！",
-                                style = MaterialTheme.typography.bodySmall,
+                                style = MiuixTheme.textStyles.footnote1,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.error
+                                color = MiuixTheme.colorScheme.error
                             )
                         } else {
                             Text(
                                 "删除后，当前 DTB 镜像条目仍保留 ${candidatesInEntry - 1} 个时序档位。若此档位为默认 native-mode 开机档位，系统将自动重定向至剩余档位。",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote1,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                         }
                     }
@@ -650,7 +624,10 @@ internal fun TimingPanel(
                 Button(
                     onClick = { showDeleteDialog = true },
                     enabled = canDelete && !state.busy,
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
@@ -660,7 +637,7 @@ internal fun TimingPanel(
             } else if (selected.hasVendorDynamicMode) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.errorContainer)
                 ) {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -670,11 +647,11 @@ internal fun TimingPanel(
                         }
                         Text(
                             "该档位包含自动变频或低功耗参数及专用屏幕命令。仅修改刷新率或复制为高刷档位，可能导致黑屏、刷新率切换异常或卡在开机画面。",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MiuixTheme.textStyles.footnote1
                         )
                         Text(
                             "请在上方选择同一面板的 normal 普通档位，再编辑或新增。例如新增 144 Hz，应选 normal_120hz，而不是 auto_120_to_30hz。",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MiuixTheme.textStyles.footnote1
                         )
                     }
                 }
@@ -691,7 +668,7 @@ internal fun TimingPanel(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "目标刷新率：${state.targetHz} Hz",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MiuixTheme.textStyles.title3,
                         fontWeight = FontWeight.Medium
                     )
 
@@ -713,14 +690,13 @@ internal fun TimingPanel(
                         ) {
                             Text(
                                 "快捷预设:",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = MiuixTheme.textStyles.footnote2,
+                                color = MiuixTheme.colorScheme.onSurfaceSecondary
                             )
                             presets.forEach { presetHz ->
-                                AssistChip(
-                                    onClick = { onTarget(presetHz) },
-                                    label = { Text("$presetHz Hz") }
-                                )
+                                MiuixChip(onClick = { onTarget(presetHz) }) {
+                                    Text("$presetHz Hz")
+                                }
                             }
                         }
                     }
@@ -731,10 +707,10 @@ internal fun TimingPanel(
                         onValueChange = { onTarget(it.toInt()) },
                         valueRange = 30f..sliderMax.toFloat()
                     )
-                    OutlinedTextField(
+                    TextField(
                         value = state.targetHz.toString(),
                         onValueChange = { value -> value.filter(Char::isDigit).toIntOrNull()?.let(onTarget) },
-                        label = { Text("目标刷新率数值 (Hz)") },
+                        label = "目标刷新率数值 (Hz)",
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -744,31 +720,31 @@ internal fun TimingPanel(
 
                 // 5. 计算策略选择
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("计算策略", style = MaterialTheme.typography.labelLarge)
+                    Text("计算策略", style = MiuixTheme.textStyles.subtitle)
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         PatchStrategy.entries.forEach { strategy ->
-                            FilterChip(
+                            MiuixSelectableChip(
+                                text = strategy.displayName,
                                 selected = state.strategy == strategy,
-                                onClick = { onStrategy(strategy) },
-                                label = { Text(strategy.displayName) }
+                                onClick = { onStrategy(strategy) }
                             )
                         }
                     }
-                    Text(state.strategy.description, style = MaterialTheme.typography.bodySmall)
+                    Text(state.strategy.description, style = MiuixTheme.textStyles.footnote1)
                 }
 
                 // 5.1 自定义时序参数配置卡片
                 if (state.strategy == PatchStrategy.CUSTOM) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        ),
-                        shape = RoundedCornerShape(10.dp)
+                        cornerRadius = 10.dp,
+                        colors = CardDefaults.defaultColors(
+                            color = MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
                     ) {
                         Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             Row(
@@ -780,59 +756,68 @@ internal fun TimingPanel(
                                     Icon(
                                         Icons.Default.Tune,
                                         contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
+                                        tint = MiuixTheme.colorScheme.primary,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(Modifier.width(6.dp))
                                     Text(
                                         "自定义时序参数",
-                                        style = MaterialTheme.typography.titleSmall,
+                                        style = MiuixTheme.textStyles.title3,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
-                                TextButton(onClick = onApplySuggestedCustom) {
+                                Button(
+                                    onClick = onApplySuggestedCustom,
+                                    colors = ButtonDefaults.buttonColors(
+                                        color = Color.Transparent,
+                                        contentColor = MiuixTheme.colorScheme.primary
+                                    )
+                                ) {
                                     Icon(Icons.Default.AutoFixHigh, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.width(4.dp))
-                                    Text("填入平衡参考值", style = MaterialTheme.typography.labelSmall)
+                                    Text("填入平衡参考值", style = MiuixTheme.textStyles.footnote2)
                                 }
                             }
 
                             val clockVal = state.customPixelClockText.toLongOrNull()
-                            OutlinedTextField(
+                            TextField(
                                 value = state.customPixelClockText,
                                 onValueChange = onCustomPixelClock,
-                                label = { Text("Pixel Clock / panel-clockrate (Hz)") },
-                                placeholder = { Text(selected.pixelClockHz?.toString() ?: "例如 1200000000") },
-                                supportingText = {
-                                    if (clockVal != null && clockVal > 0) {
-                                        Text(TimingUtils.formatClock(clockVal))
-                                    } else {
-                                        Text("设备树像素/通道时钟，单位 Hz")
-                                    }
-                                },
+                                label = "Pixel Clock / panel-clockrate (Hz)",
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
+                            if (clockVal != null && clockVal > 0) {
+                                Text(
+                                    TimingUtils.formatClock(clockVal),
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
+                                )
+                            } else {
+                                Text(
+                                    "设备树像素/通道时钟，单位 Hz",
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary
+                                )
+                            }
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                OutlinedTextField(
+                                TextField(
                                     value = state.customVfpText,
                                     onValueChange = onCustomVfp,
-                                    label = { Text("垂直前肩 (VFP)") },
-                                    placeholder = { Text(selected.vFrontPorch?.toString() ?: "行") },
+                                    label = "垂直前肩 (VFP)",
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     singleLine = true,
                                     modifier = Modifier.weight(1f)
                                 )
-                                OutlinedTextField(
+                                TextField(
                                     value = state.customVbpText,
                                     onValueChange = onCustomVbp,
-                                    label = { Text("垂直后肩 (VBP)") },
-                                    placeholder = { Text(selected.vBackPorch?.toString() ?: "行") },
+                                    label = "垂直后肩 (VBP)",
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     singleLine = true,
                                     modifier = Modifier.weight(1f)
@@ -849,13 +834,13 @@ internal fun TimingPanel(
                             ) {
                                 Text(
                                     "高级消隐参数 (HFP / HBP)",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary
+                                    style = MiuixTheme.textStyles.footnote1,
+                                    color = MiuixTheme.colorScheme.primary
                                 )
                                 Icon(
                                     if (showHorizontalCustom) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.outline
+                                    tint = MiuixTheme.colorScheme.outline
                                 )
                             }
 
@@ -864,20 +849,18 @@ internal fun TimingPanel(
                                     modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    OutlinedTextField(
+                                    TextField(
                                         value = state.customHfpText,
                                         onValueChange = onCustomHfp,
-                                        label = { Text("水平前肩 (HFP)") },
-                                        placeholder = { Text(selected.hFrontPorch?.toString() ?: "px") },
+                                        label = "水平前肩 (HFP)",
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         singleLine = true,
                                         modifier = Modifier.weight(1f)
                                     )
-                                    OutlinedTextField(
+                                    TextField(
                                         value = state.customHbpText,
                                         onValueChange = onCustomHbp,
-                                        label = { Text("水平后肩 (HBP)") },
-                                        placeholder = { Text(selected.hBackPorch?.toString() ?: "px") },
+                                        label = "水平后肩 (HBP)",
                                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                         singleLine = true,
                                         modifier = Modifier.weight(1f)
@@ -900,7 +883,7 @@ internal fun TimingPanel(
                             if (clk > 0 && hTotal > 0 && vTotal > 0) {
                                 val theoreticalHz = clk.toDouble() / (hTotal.toDouble() * vTotal.toDouble())
                                 Surface(
-                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                    color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -913,13 +896,13 @@ internal fun TimingPanel(
                                             Icons.Default.Calculate,
                                             contentDescription = null,
                                             modifier = Modifier.size(16.dp),
-                                            tint = MaterialTheme.colorScheme.primary
+                                            tint = MiuixTheme.colorScheme.primary
                                         )
                                         Text(
                                             "理论推算物理刷新率: ${String.format(Locale.US, "%.2f", theoreticalHz)} Hz (目标: ${state.targetHz} Hz)",
-                                            style = MaterialTheme.typography.labelSmall,
+                                            style = MiuixTheme.textStyles.footnote2,
                                             fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            color = MiuixTheme.colorScheme.onPrimaryContainer
                                         )
                                     }
                                 }
@@ -938,7 +921,11 @@ internal fun TimingPanel(
                 )
 
                 // 7. 执行修补 / 新增按钮
-                Button(onClick = onStageChange, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = onStageChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColorsPrimary()
+                ) {
                     Icon(
                         if (state.patchMode == PatchMode.APPEND_NEW) Icons.Default.Add else Icons.Default.Build,
                         contentDescription = null
@@ -951,33 +938,36 @@ internal fun TimingPanel(
     }
 
     if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            icon = { Icon(Icons.Default.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
-            title = { Text("确认删除该时序档位？") },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("将从工作区设备树中移除 ${TimingUtils.parseTimingNodeName(selected.nodePath)} (${selected.currentHz} Hz) 节点。")
-                    Text("删除后将记入待打包修改清单，全部调整完成后可统一打包生成 DTBO 镜像。")
-                }
-            },
-            confirmButton = {
+        WindowDialog(
+            show = true,
+            title = "确认删除该时序档位？",
+            onDismissRequest = { showDeleteDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("将从工作区设备树中移除 ${TimingUtils.parseTimingNodeName(selected.nodePath)} (${selected.currentHz} Hz) 节点。")
+                Text("删除后将记入待打包修改清单，全部调整完成后可统一打包生成 DTBO 镜像。")
                 Button(
                     onClick = {
                         showDeleteDialog = false
                         onStageChange()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("确认删除 (暂存)")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
+                Button(
+                    onClick = { showDeleteDialog = false },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 }
 
@@ -992,10 +982,10 @@ internal fun StagedChangesCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
-        ),
-        shape = RoundedCornerShape(12.dp)
+        cornerRadius = 12.dp,
+        colors = CardDefaults.defaultColors(
+            color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+        )
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
@@ -1007,20 +997,21 @@ internal fun StagedChangesCard(
                     Icon(
                         Icons.Default.History,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MiuixTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
                         "已暂存的时序修改 (${stagedChanges.size} 项)",
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MiuixTheme.textStyles.title3,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MiuixTheme.colorScheme.primary
                     )
                 }
-                TextButton(
+                Button(
                     onClick = { showResetDialog = true },
-                    enabled = !busy
+                    enabled = !busy,
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary)
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(4.dp))
@@ -1030,8 +1021,8 @@ internal fun StagedChangesCard(
 
             Text(
                 "您可继续在上方对其他档位进行新增、修改或删除。待所有档位操作调整完毕后，点击下方「打包生成 DTBO 镜像」统一重构生成最终刷写文件。",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MiuixTheme.textStyles.footnote1,
+                color = MiuixTheme.colorScheme.onSurfaceSecondary
             )
 
             Column(
@@ -1040,7 +1031,7 @@ internal fun StagedChangesCard(
             ) {
                 stagedChanges.forEachIndexed { index, change ->
                     Surface(
-                        color = MaterialTheme.colorScheme.surface,
+                        color = MiuixTheme.colorScheme.surface,
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -1050,16 +1041,16 @@ internal fun StagedChangesCard(
                         ) {
                             Surface(
                                 color = when (change.mode) {
-                                    PatchMode.APPEND_NEW -> MaterialTheme.colorScheme.secondaryContainer
-                                    PatchMode.DELETE_EXISTING -> MaterialTheme.colorScheme.errorContainer
-                                    PatchMode.OVERWRITE_EXISTING -> MaterialTheme.colorScheme.primaryContainer
+                                    PatchMode.APPEND_NEW -> MiuixTheme.colorScheme.secondaryContainer
+                                    PatchMode.DELETE_EXISTING -> MiuixTheme.colorScheme.errorContainer
+                                    PatchMode.OVERWRITE_EXISTING -> MiuixTheme.colorScheme.primaryContainer
                                 },
                                 shape = RoundedCornerShape(6.dp)
                             ) {
                                 Text(
                                     "${index + 1}",
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MiuixTheme.textStyles.footnote2,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -1067,13 +1058,13 @@ internal fun StagedChangesCard(
                             Column {
                                 Text(
                                     change.summary,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MiuixTheme.textStyles.footnote1,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
                                     "节点: ${change.nodeName} · DTB[${change.entryIndex}]",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MiuixTheme.textStyles.footnote2,
+                                    color = MiuixTheme.colorScheme.onSurfaceSecondary,
                                     fontFamily = FontFamily.Monospace
                                 )
                             }
@@ -1085,7 +1076,8 @@ internal fun StagedChangesCard(
             Button(
                 onClick = onPackage,
                 enabled = !busy && stagedChanges.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColorsPrimary()
             ) {
                 Icon(Icons.Default.Build, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -1095,28 +1087,35 @@ internal fun StagedChangesCard(
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
-            title = { Text("确认放弃并重置所有修改？") },
-            text = { Text("此操作将丢弃当前暂存的 ${stagedChanges.size} 项修改，工作区将恢复至初始提取状态。") },
-            confirmButton = {
+        WindowDialog(
+            show = true,
+            title = "确认放弃并重置所有修改？",
+            onDismissRequest = { showResetDialog = false }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text("此操作将丢弃当前暂存的 ${stagedChanges.size} 项修改，工作区将恢复至初始提取状态。")
                 Button(
                     onClick = {
                         showResetDialog = false
                         onReset()
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColorsPrimary(
+                        color = MiuixTheme.colorScheme.error,
+                        contentColor = MiuixTheme.colorScheme.onError
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("确认重置")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
+                Button(
+                    onClick = { showResetDialog = false },
+                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text("取消")
                 }
             }
-        )
+        }
     }
 }
 
@@ -1131,7 +1130,7 @@ internal fun OutputCard(
     val report = state.patchReport ?: return
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("输出", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            Text("输出", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
             val modeTitle = if (report.stagedChanges.size > 1) {
                 "集中打包完成：共包含 ${report.stagedChanges.size} 项时序修改"
             } else when (report.mode) {
@@ -1140,20 +1139,24 @@ internal fun OutputCard(
                 PatchMode.OVERWRITE_EXISTING -> "${report.originalHz} Hz → ${report.targetHz} Hz · ${report.strategy.displayName}"
             }
             Text(modeTitle, fontWeight = FontWeight.Medium)
-            report.changes.forEach { Text("• $it", style = MaterialTheme.typography.bodySmall) }
+            report.changes.forEach { Text("• $it", style = MiuixTheme.textStyles.footnote1) }
             report.warnings.forEach {
-                Text("⚠ $it", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                Text("⚠ $it", style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.error)
             }
 
-            Button(onClick = onSavePatched, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onSavePatched,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColorsPrimary()
+            ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("保存 dtbo_patched.img")
             }
-            OutlinedButton(onClick = onRecoveryZip, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onRecoveryZip, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors()) {
                 Text("导出 Recovery 刷机 Zip")
             }
-            OutlinedButton(onClick = onFastbootBundle, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onFastbootBundle, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors()) {
                 Text("导出 PC Fastboot 一键包")
             }
 
@@ -1164,7 +1167,11 @@ internal fun OutputCard(
             Button(
                 onClick = onFlash,
                 enabled = canFlash,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColorsPrimary(
+                    color = MiuixTheme.colorScheme.error,
+                    contentColor = MiuixTheme.colorScheme.onError
+                )
             ) {
                 Icon(Icons.Default.FlashOn, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -1173,7 +1180,7 @@ internal fun OutputCard(
             if (!canFlash) {
                 Text(
                     "直接刷写要求：Root 已授权、镜像来自当前手机分区、且不是“仅 Framerate”策略。",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MiuixTheme.textStyles.footnote2
                 )
             }
         }
@@ -1191,18 +1198,18 @@ internal fun RescueMemoCard(
     val flash = state.lastFlash ?: return
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.errorContainer)
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Warning, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("救砖备忘录", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("救砖备忘录", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.Bold)
             }
             Text("已刷写：${flash.flashedPartition}")
-            Text("备份 SHA-256：${flash.backupSha256}", fontFamily = FontFamily.Monospace, style = MaterialTheme.typography.bodySmall)
-            flash.backupExternalUri?.let { Text("备份外部位置：$it", style = MaterialTheme.typography.labelSmall) }
-            flash.rescueExternalUri?.let { Text("Rescue Zip 外部位置：$it", style = MaterialTheme.typography.labelSmall) }
+            Text("备份 SHA-256：${flash.backupSha256}", fontFamily = FontFamily.Monospace, style = MiuixTheme.textStyles.footnote1)
+            flash.backupExternalUri?.let { Text("备份外部位置：$it", style = MiuixTheme.textStyles.footnote2) }
+            flash.rescueExternalUri?.let { Text("Rescue Zip 外部位置：$it", style = MiuixTheme.textStyles.footnote2) }
 
             flash.rollbackCommands.forEach { command ->
                 Card {
@@ -1219,14 +1226,14 @@ internal fun RescueMemoCard(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onExportBackup, modifier = Modifier.weight(1f)) {
+                Button(onClick = onExportBackup, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors()) {
                     Text("导出备份")
                 }
-                OutlinedButton(onClick = onExportRescue, modifier = Modifier.weight(1f)) {
+                Button(onClick = onExportRescue, modifier = Modifier.weight(1f), colors = ButtonDefaults.buttonColors()) {
                     Text("导出救援包")
                 }
             }
-            OutlinedButton(onClick = onScreenshot, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onScreenshot, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors()) {
                 Icon(Icons.Default.Image, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("截图保存备忘录")
@@ -1245,15 +1252,15 @@ internal fun TerminalCard(logs: List<String>, onClear: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("终端回显", Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                TextButton(onClick = onClear) { Text("清空") }
+                Text("终端回显", Modifier.weight(1f), style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
+                TextButton(text = "清空", onClick = onClear)
             }
             SelectionContainer {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(230.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
+                        .background(MiuixTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
                         .padding(10.dp),
                     state = listState
                 ) {
@@ -1261,7 +1268,7 @@ internal fun TerminalCard(logs: List<String>, onClear: () -> Unit) {
                         Text(
                             line,
                             fontFamily = FontFamily.Monospace,
-                            style = MaterialTheme.typography.labelSmall
+                            style = MiuixTheme.textStyles.footnote2
                         )
                     }
                 }
@@ -1290,51 +1297,60 @@ private fun DangerousFlashDialog(
     val semanticMatch = confirmation.trim() == targetHz.toString() || confirmation.trim() == "FLASH"
     val enabled = seconds == 0 && semanticMatch
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = { Icon(Icons.Default.Warning, contentDescription = null) },
-        title = { Text("高危操作：写入物理 DTBO 分区") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text("目标：$partition")
-                Text("本应用只写当前目标槽位。写入前会强制备份、SHA-256 校验并生成 Rescue Zip。")
-                Text("请输入目标刷新率 $targetHz，或输入大写 FLASH：")
-                OutlinedTextField(
-                    value = confirmation,
-                    onValueChange = { confirmation = it },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+    WindowDialog(
+        show = true,
+        title = "高危操作：写入物理 DTBO 分区",
+        summary = "目标：$partition",
+        onDismissRequest = onDismiss
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = MiuixTheme.colorScheme.error,
+                    modifier = Modifier.size(20.dp)
                 )
-                if (seconds > 0) {
-                    Text(
-                        "确认按钮将在 $seconds 秒后解锁",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "本应用只写当前目标槽位。写入前会强制备份、SHA-256 校验并生成 Rescue Zip。",
+                    style = MiuixTheme.textStyles.footnote1
+                )
             }
-        },
-        confirmButton = {
-            Button(onClick = onConfirm, enabled = enabled) {
+            Text("请输入目标刷新率 $targetHz，或输入大写 FLASH：")
+            TextField(
+                value = confirmation,
+                onValueChange = { confirmation = it },
+                label = "确认词（$targetHz 或 FLASH）",
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (seconds > 0) {
+                Text(
+                    "确认按钮将在 $seconds 秒后解锁",
+                    color = MiuixTheme.colorScheme.error
+                )
+            }
+            Button(
+                onClick = onConfirm,
+                enabled = enabled,
+                colors = ButtonDefaults.buttonColorsPrimary(
+                    color = MiuixTheme.colorScheme.error,
+                    contentColor = MiuixTheme.colorScheme.onError
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("确认单槽位刷写")
             }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("取消") }
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("取消")
+            }
         }
-    )
-}
-
-@Composable
-private fun AppTheme(content: @Composable () -> Unit) {
-    val context = LocalContext.current
-    val dark = isSystemInDarkTheme()
-    val scheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dark -> dynamicDarkColorScheme(context)
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> dynamicLightColorScheme(context)
-        dark -> darkColorScheme()
-        else -> lightColorScheme()
     }
-    MaterialTheme(colorScheme = scheme, content = content)
 }
 
 private fun copyText(context: Context, label: String, text: String) {

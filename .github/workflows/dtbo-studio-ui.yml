@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - chatgpt/dtbo-studio-ui
+      - miuix-migration
 
 jobs:
   validate:
