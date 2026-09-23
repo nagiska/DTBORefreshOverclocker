@@ -24,6 +24,12 @@ jobs:
         run: ./gradlew testDebugUnitTest --stacktrace
       - name: Assemble debug
         run: ./gradlew assembleDebug --stacktrace
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: DTBOStudio-Debug-APK
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
       - name: Package source
         run: |
           zip -r DTBOStudio_Source.zip . \
