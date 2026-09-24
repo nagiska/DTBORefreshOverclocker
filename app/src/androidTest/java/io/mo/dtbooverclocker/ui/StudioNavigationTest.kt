@@ -66,7 +66,8 @@ class StudioNavigationTest {
         restoration.emulateSavedInstanceStateRestore()
         tab(StudioTab.SETTINGS).assertIsSelected()
         tab(StudioTab.OVERVIEW).performClick()
-        compose.onNodeWithTag("input-OVERVIEW").assertTextEquals("saved query")
+        // Miuix TextField 会把 label 合并进节点 Text, 故用包含匹配而非全等
+        compose.onNodeWithTag("input-OVERVIEW").assertTextContains("saved query", substring = true)
     }
 
     @Test

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -44,10 +45,10 @@ class AppSmokeTest {
         compose.waitForIdle()
         compose.onNodeWithText("还没有工作区").assertIsDisplayed()
 
-        // 5. 设备树 Tab
+        // 5. 设备树 Tab（标题在顶栏副标题/页面标题/底栏多处出现，取首个即可）
         compose.onNode(hasText("设备树") and hasClickAction()).performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("设备树").assertIsDisplayed()
+        compose.onAllNodesWithText("设备树").onFirst().assertIsDisplayed()
 
         // 6. 设置 Tab
         compose.onNode(hasText("设置") and hasClickAction()).performClick()
