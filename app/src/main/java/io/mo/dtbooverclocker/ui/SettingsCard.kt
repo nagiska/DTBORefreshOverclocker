@@ -30,7 +30,7 @@ fun SettingsCard(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
             shape = shape,
-            color = MiuixTheme.colorScheme.surface,
+            color = MiuixTheme.colorScheme.surfaceContainer,
             border = border,
             content = body
         )
@@ -38,7 +38,7 @@ fun SettingsCard(
         Surface(
             modifier = modifier.fillMaxWidth(),
             shape = shape,
-            color = MiuixTheme.colorScheme.surface,
+            color = MiuixTheme.colorScheme.surfaceContainer,
             border = border,
             content = body
         )

@@ -543,7 +543,7 @@ private fun TimingCandidateCard(
         color = if (selected) {
             MiuixTheme.colorScheme.primaryContainer
         } else {
-            MiuixTheme.colorScheme.surface
+            MiuixTheme.colorScheme.surfaceContainer
         },
         border = BorderStroke(
             width = if (selected) 2.dp else 1.dp,

@@ -258,7 +258,7 @@ private fun ModuleCard(title: String, subtitle: String, icon: ImageVector, enabl
         modifier = Modifier.width(150.dp),
         colors = CardDefaults.defaultColors(
             color = if (active) MiuixTheme.colorScheme.primaryContainer
-            else MiuixTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f)
+            else MiuixTheme.colorScheme.surfaceContainer
         ),
         // 3D 倾斜按压动画（Miuix Card 内置 PressFeedbackType.Tilt）
         pressFeedbackType = if (enabled) PressFeedbackType.Tilt else PressFeedbackType.None,

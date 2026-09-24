@@ -1045,7 +1045,7 @@ internal fun StagedChangesCard(
                 }
                 Card(
                     cornerRadius = 10.dp,
-                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surface),
+                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surfaceContainer),
                     onClick = if (busy) null else ({ showResetDialog = true })
                 ) {
                     Row(
@@ -1071,7 +1071,7 @@ internal fun StagedChangesCard(
             ) {
                 stagedChanges.forEachIndexed { index, change ->
                     Surface(
-                        color = MiuixTheme.colorScheme.surface,
+                        color = MiuixTheme.colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
