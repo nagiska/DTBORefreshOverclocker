@@ -39,12 +39,12 @@ fun MiuixChip(
 ) {
     val bg = if (selected) selectedContainerColor else containerColor
     val fg = if (selected) selectedContentColor else contentColor
-    val shape = RoundedCornerShape(9.dp)
+    val shape = RoundedCornerShape(8.dp)
     val border = if (selected) null else BorderStroke(1.dp, MiuixTheme.colorScheme.outline.copy(alpha = 0.35f))
 
     val content: @Composable () -> Unit = {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (leadingIcon != null) {
@@ -52,9 +52,9 @@ fun MiuixChip(
                     imageVector = leadingIcon,
                     contentDescription = null,
                     tint = fg,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(13.dp)
                 )
-                Spacer(Modifier.size(5.dp))
+                Spacer(Modifier.size(4.dp))
             }
             label()
         }
@@ -97,7 +97,7 @@ fun MiuixInfoChip(
         contentColor = contentColor,
         leadingIcon = leadingIcon
     ) {
-        Text(text = text)
+        Text(text = text, style = MiuixTheme.textStyles.footnote2)
     }
 }
 
@@ -122,13 +122,13 @@ fun MiuixSelectableChip(
         selectedContainerColor = selectedContainerColor,
         selectedContentColor = selectedContentColor
     ) {
-        Text(text = text)
+        Text(text = text, style = MiuixTheme.textStyles.footnote2)
         if (selected) {
-            Spacer(Modifier.size(4.dp))
+            Spacer(Modifier.size(3.dp))
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(12.dp)
             )
         }
     }

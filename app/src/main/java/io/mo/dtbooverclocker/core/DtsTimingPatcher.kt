@@ -220,16 +220,21 @@ object DtsTimingPatcher {
                         refContent.contains("&{${candidate.nodePath}}") ||
                         refContent.contains("&$nodeName")
                     if (isReferencingDeleted) {
-                        val targetSibling = remainingSiblings.first()
-                        val targetSibText = fullText.substring(targetSibling.start, targetSibling.endExclusive)
-                        val targetSibLabel = openHeaderRegex.find(targetSibText)?.groups?.get(1)?.value
-                        val newRef = if (targetSibLabel != null) "&$targetSibLabel" else "&{${targetSibling.path}}"
-                        patchedFullText = patchedFullText.replaceRange(
-                            nativeMatch.groups[2]!!.range,
-                            newRef
-                        )
-                        changes += "🔄 默认开机档位 (native-mode) 原指向被删节点，已自动重定向为 $newRef"
-                        warnings += "已自动修正 native-mode 指向剩余的时序档位。"
+                        // 防御：极端情况下剩余兄弟节点为空时跳过重定向，避免崩溃
+                        val targetSibling = remainingSiblings.firstOrNull()
+                        if (targetSibling != null) {
+                            val targetSibText = fullText.substring(targetSibling.start, targetSibling.endExclusive)
+                            val targetSibLabel = openHeaderRegex.find(targetSibText)?.groups?.get(1)?.value
+                            val newRef = if (targetSibLabel != null) "&$targetSibLabel" else "&{${targetSibling.path}}"
+                            patchedFullText = patchedFullText.replaceRange(
+                                nativeMatch.groups[2]!!.range,
+                                newRef
+                            )
+                            changes += "🔄 默认开机档位 (native-mode) 原指向被删节点，已自动重定向为 $newRef"
+                            warnings += "已自动修正 native-mode 指向剩余的时序档位。"
+                        } else {
+                            warnings += "未找到可重定向的剩余时序档位，native-mode 引用保持不变。"
+                        }
                     }
                 }
 

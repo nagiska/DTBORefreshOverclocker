@@ -98,6 +98,8 @@ import io.mo.dtbooverclocker.ui.components.TimingCandidateSelector
 import io.mo.dtbooverclocker.ui.components.TimingGeometryChart
 import io.mo.dtbooverclocker.ui.components.TimingUtils
 import io.mo.dtbooverclocker.ui.theme.AppTheme
+import io.mo.dtbooverclocker.util.AppLogger
+import io.mo.dtbooverclocker.util.LogLevel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -130,11 +132,40 @@ enum class AppScreen {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
+        installCrashGuard()
         enableEdgeToEdge()
         setContent {
             AppTheme {
                 DtboOverclockerApp()
             }
+        }
+    }
+}
+
+/**
+ * 全局崩溃捕获：把未捕获异常的完整堆栈写入应用日志，
+ * 出闪退后可通过「设置 -> 运行日志 -> 导出完整日志」定位原因。
+ * 记录后仍然交给原有默认处理器，保持系统默认的崩溃行为。
+ */
+private fun installCrashGuard() {
+    val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
+    Thread.setDefaultUncaughtExceptionHandler { thread, error ->
+        AppLogger.log(
+            LogLevel.CRITICAL,
+            "CRASH",
+            buildString {
+                appendLine("未捕获异常 @线程[${thread.name}]")
+                appendLine("异常类型: ${error.javaClass.name}")
+                appendLine("异常消息: ${error.message}")
+                appendLine("堆栈跟踪:")
+                appendLine(error.stackTraceToString())
+            }
+        )
+        if (previousHandler != null) {
+            previousHandler.uncaughtException(thread, error)
+        } else {
+            android.os.Process.killProcess(android.os.Process.myPid())
+            kotlin.system.exitProcess(10)
         }
     }
 }
@@ -363,8 +394,8 @@ internal fun SourceCard(
     onExtract: () -> Unit
 ) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("镜像来源", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("镜像来源", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -372,34 +403,38 @@ internal fun SourceCard(
                 Button(
                     onClick = onImport,
                     modifier = Modifier.weight(1f),
+                    insideMargin = PaddingValues(horizontal = 10.dp, vertical = 7.dp),
+                    minHeight = 36.dp,
                     colors = ButtonDefaults.buttonColorsPrimary()
                 ) {
-                    Icon(Icons.Default.FolderOpen, contentDescription = null)
+                    Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("手动导入")
+                    Text("手动导入", style = MiuixTheme.textStyles.footnote1)
                 }
                 Button(
                     onClick = onExtract,
                     enabled = state.rootState.suPresent,
                     modifier = Modifier.weight(1f),
+                    insideMargin = PaddingValues(horizontal = 10.dp, vertical = 7.dp),
+                    minHeight = 36.dp,
                     colors = ButtonDefaults.buttonColors()
                 ) {
-                    Icon(Icons.Default.Save, contentDescription = null)
+                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("提取当前分区")
+                    Text("提取当前分区", style = MiuixTheme.textStyles.footnote1)
                 }
             }
 
             if (!state.rootState.suPresent) {
                 Text(
                     "未检测到 Root 权限，可点击“手动导入”选择外部 dtbo.img 文件。",
-                    style = MiuixTheme.textStyles.footnote1,
+                    style = MiuixTheme.textStyles.footnote2,
                     color = MiuixTheme.colorScheme.onSurfaceSecondary
                 )
             } else {
                 Text(
                     "手动导入支持外部镜像（免 Root）；提取当前分区只读取 ${state.slotInfo?.blockDevice ?: "当前 dtbo"}",
-                    style = MiuixTheme.textStyles.footnote1,
+                    style = MiuixTheme.textStyles.footnote2,
                     color = MiuixTheme.colorScheme.onSurfaceSecondary
                 )
             }
@@ -417,13 +452,13 @@ internal fun ImageSummaryCard(state: MainUiState) {
     val panelCount = groups.size
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("镜像解析结果", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
+                Text("镜像解析结果", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
                 Surface(
                     color = MiuixTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(6.dp)
@@ -438,7 +473,7 @@ internal fun ImageSummaryCard(state: MainUiState) {
             }
 
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 MiuixInfoChip(text = "DTB: ${workspace.metadata.entries.size}")
@@ -987,7 +1022,7 @@ internal fun StagedChangesCard(
             color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
         )
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -998,7 +1033,7 @@ internal fun StagedChangesCard(
                         Icons.Default.History,
                         contentDescription = null,
                         tint = MiuixTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(
@@ -1129,8 +1164,8 @@ internal fun OutputCard(
 ) {
     val report = state.patchReport ?: return
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("输出", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text("输出", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
             val modeTitle = if (report.stagedChanges.size > 1) {
                 "集中打包完成：共包含 ${report.stagedChanges.size} 项时序修改"
             } else when (report.mode) {
@@ -1200,11 +1235,11 @@ internal fun RescueMemoCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.errorContainer)
     ) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Warning, contentDescription = null)
+                Icon(Icons.Default.Warning, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("救砖备忘录", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.Bold)
+                Text("救砖备忘录", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.Bold)
             }
             Text("已刷写：${flash.flashedPartition}")
             Text("备份 SHA-256：${flash.backupSha256}", fontFamily = FontFamily.Monospace, style = MiuixTheme.textStyles.footnote1)
@@ -1250,16 +1285,16 @@ internal fun TerminalCard(logs: List<String>, onClear: () -> Unit) {
     }
 
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("终端回显", Modifier.weight(1f), style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
+                Text("终端回显", Modifier.weight(1f), style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold)
                 TextButton(text = "清空", onClick = onClear)
             }
             SelectionContainer {
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(230.dp)
+                        .height(200.dp)
                         .background(MiuixTheme.colorScheme.surfaceVariant, RoundedCornerShape(10.dp))
                         .padding(10.dp),
                     state = listState

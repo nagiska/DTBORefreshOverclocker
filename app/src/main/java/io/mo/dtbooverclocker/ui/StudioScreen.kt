@@ -152,10 +152,14 @@ private fun OverviewTab(
 @Composable
 private fun StudioHeroCard(state: MainUiState) {
     Card(Modifier.fillMaxWidth(), colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.55f))) {
-        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Android Device Tree Toolkit", style = MiuixTheme.textStyles.title1, fontWeight = FontWeight.Bold)
-            Text("导入、分析、编辑、验证并重新构建 DTBO。", color = MiuixTheme.colorScheme.onSurfaceSecondary)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Android Device Tree Toolkit", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.Bold)
+            Text(
+                "导入、分析、编辑、验证并重新构建 DTBO。",
+                style = MiuixTheme.textStyles.footnote1,
+                color = MiuixTheme.colorScheme.onSurfaceSecondary
+            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 MiuixInfoChip(text = if (state.rootState.granted) "Root ✓" else "免 Root 可用")
                 state.slotInfo?.let { MiuixInfoChip(text = it.label) }
                 MiuixInfoChip(text = if (state.workspace != null) "工作区已加载" else "等待镜像")
@@ -174,29 +178,51 @@ private fun ModulesTab(
 ) {
     var activeModule by rememberSaveable { mutableStateOf<StudioModule?>(null) }
     val workspace = state.workspace
+    val refreshRateActive = activeModule == StudioModule.REFRESH_RATE
     LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Spacer(Modifier.height(2.dp)) }
-        item { Column { Text("功能模块", style = MiuixTheme.textStyles.headline1, fontWeight = FontWeight.Bold); Text("专用模块负责常见硬件配置；通用修改最终统一落到设备树编辑器。", color = MiuixTheme.colorScheme.onSurfaceSecondary) } }
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text("功能模块", style = MiuixTheme.textStyles.headline1, fontWeight = FontWeight.Bold)
+                Text(
+                    "点击模块卡片即在下方展开对应功能，无需滚动查找。",
+                    style = MiuixTheme.textStyles.footnote2,
+                    color = MiuixTheme.colorScheme.onSurfaceSecondary
+                )
+            }
+        }
         if (workspace == null) {
             item { WorkspaceRequiredCard() }
         } else {
-            item { Text("显示", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold) }
-            item { FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                ModuleCard("刷新率", workspace.candidates.size.toString() + " 个时序候选", Icons.Default.Monitor, workspace.candidates.isNotEmpty(), activeModule == StudioModule.REFRESH_RATE) { activeModule = if (activeModule == StudioModule.REFRESH_RATE) null else StudioModule.REFRESH_RATE }
-                ModuleCard("分辨率", "规划中", Icons.Default.AspectRatio, false)
-                ModuleCard("DSC", "规划中", Icons.Default.Tune, false)
-                ModuleCard("亮度 / HBM", "规划中", Icons.Default.Brightness6, false)
-            } }
-            item { Text("硬件", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold) }
-            item { FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                ModuleCard("Thermal", "规划中", Icons.Default.Thermostat, false)
-                ModuleCard("Charging", "规划中", Icons.Default.BatteryChargingFull, false)
-                ModuleCard("Touch", "规划中", Icons.Default.TouchApp, false)
-                ModuleCard("高级属性", "设备树编辑器", Icons.Default.Code, false)
-            } }
-            if (activeModule == StudioModule.REFRESH_RATE && workspace.candidates.isNotEmpty()) {
-                item { HorizontalDivider() }
-                item { TimingPanel(state, onSelect, onTarget, onStrategy, onPatchMode, onCustomPixelClock, onCustomVfp, onCustomVbp, onCustomHfp, onCustomHbp, onApplySuggestedCustom, onStageChange) }
+            item { Text("显示", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold) }
+            item {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ModuleCard(
+                        title = "刷新率",
+                        subtitle = if (refreshRateActive) "点击收起" else "${workspace.candidates.size} 个候选 · 点击展开",
+                        icon = Icons.Default.Monitor,
+                        enabled = workspace.candidates.isNotEmpty(),
+                        active = refreshRateActive
+                    ) { activeModule = if (refreshRateActive) null else StudioModule.REFRESH_RATE }
+                    ModuleCard("分辨率", "规划中", Icons.Default.AspectRatio, false)
+                    ModuleCard("DSC", "规划中", Icons.Default.Tune, false)
+                    ModuleCard("亮度 / HBM", "规划中", Icons.Default.Brightness6, false)
+                }
+            }
+            // 手风琴：刷新率模块展开后，内容直接出现在所属分区的正下方
+            if (refreshRateActive && workspace.candidates.isNotEmpty()) {
+                item {
+                    TimingPanel(state, onSelect, onTarget, onStrategy, onPatchMode, onCustomPixelClock, onCustomVfp, onCustomVbp, onCustomHfp, onCustomHbp, onApplySuggestedCustom, onStageChange)
+                }
+            }
+            item { Text("硬件", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold) }
+            item {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ModuleCard("Thermal", "规划中", Icons.Default.Thermostat, false)
+                    ModuleCard("Charging", "规划中", Icons.Default.BatteryChargingFull, false)
+                    ModuleCard("Touch", "规划中", Icons.Default.TouchApp, false)
+                    ModuleCard("高级属性", "设备树编辑器", Icons.Default.Code, false)
+                }
             }
         }
         item { Spacer(Modifier.height(24.dp)) }
@@ -205,8 +231,27 @@ private fun ModulesTab(
 
 @Composable
 private fun ModuleCard(title: String, subtitle: String, icon: ImageVector, enabled: Boolean, active: Boolean = false, onClick: () -> Unit = {}) {
-    Card(Modifier.width(164.dp).clickable(enabled = enabled, onClick = onClick), colors = CardDefaults.defaultColors(color = if (active) MiuixTheme.colorScheme.primaryContainer else MiuixTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f))) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Icon(icon, null); Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary) }
+    Card(
+        modifier = Modifier
+            .width(150.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        colors = CardDefaults.defaultColors(
+            color = if (active) MiuixTheme.colorScheme.primaryContainer
+            else MiuixTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f)
+        )
+    ) {
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(title, style = MiuixTheme.textStyles.footnote1, fontWeight = FontWeight.SemiBold)
+            }
+            Text(
+                subtitle,
+                style = MiuixTheme.textStyles.footnote2,
+                color = MiuixTheme.colorScheme.onSurfaceSecondary
+            )
+        }
     }
 }
 

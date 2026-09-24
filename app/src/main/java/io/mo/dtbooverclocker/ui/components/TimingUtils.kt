@@ -81,7 +81,7 @@ object TimingUtils {
                 seg.contains("panel", ignoreCase = true) ||
                 seg.contains("nt3", ignoreCase = true) ||
                 seg.contains("sw4", ignoreCase = true)
-        } ?: segments.last()
+        } ?: segments.lastOrNull() ?: nodePath
     }
 
     /**

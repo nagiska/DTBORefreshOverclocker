@@ -326,16 +326,16 @@ class DtboPatchEngine(
             warnings += "包含仅 Framerate 策略的修改，存在时序不匹配风险，不建议直接刷写。"
         }
 
-        val lastChange = stagedChanges.last()
+        val lastChange = stagedChanges.lastOrNull()
         logSink("[OK] 集中打包镜像生成完成：${outputImage.absolutePath} (包含 ${stagedChanges.size} 项修改)")
 
         PatchReport(
             outputImage = outputImage,
-            targetHz = lastChange.targetHz,
-            originalHz = lastChange.originalHz,
-            strategy = lastChange.strategy,
-            mode = lastChange.mode,
-            customParams = lastChange.customParams,
+            targetHz = lastChange?.targetHz ?: 0,
+            originalHz = lastChange?.originalHz ?: 0,
+            strategy = lastChange?.strategy ?: PatchStrategy.BALANCED_BLANKING_TIME,
+            mode = lastChange?.mode ?: PatchMode.OVERWRITE_EXISTING,
+            customParams = lastChange?.customParams,
             stagedChanges = stagedChanges,
             changes = allChanges,
             warnings = warnings
