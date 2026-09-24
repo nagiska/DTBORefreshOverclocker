@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -62,6 +61,7 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
+import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class PanelFilterScope(val label: String) {
@@ -542,13 +542,17 @@ private fun TimingCandidateCard(
             .fillMaxWidth()
             .then(
                 if (selected) {
-                    Modifier.border(
+                    Modifier.squircleBorder(
                         width = 2.dp,
                         color = MiuixTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
+                        cornerRadius = 12.dp
                     )
                 } else {
-                    Modifier
+                    Modifier.squircleBorder(
+                        width = 1.dp,
+                        color = MiuixTheme.colorScheme.outline.copy(alpha = 0.4f),
+                        cornerRadius = 12.dp
+                    )
                 }
             ),
         cornerRadius = 12.dp,

@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.BuildConfig
+import io.mo.dtbooverclocker.ui.SettingsCard
 import io.mo.dtbooverclocker.ui.components.MiuixInfoChip
 import io.mo.dtbooverclocker.util.StorageUtils
 import top.yukonga.miuix.kmp.basic.Button
@@ -116,12 +117,7 @@ fun SettingsScreen(
 
             // 1. Environment Status Section
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.surface
-                    )
-                ) {
+                SettingsCard {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -193,14 +189,7 @@ fun SettingsScreen(
 
             // 1.5 Rollback & Backup Management Entry
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onNavigateToRollback),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.surface
-                    )
-                ) {
+                SettingsCard(onClick = onNavigateToRollback) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -253,12 +242,7 @@ fun SettingsScreen(
 
             // 2. Cache Management Section
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.surface
-                    )
-                ) {
+                SettingsCard {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -331,12 +315,7 @@ fun SettingsScreen(
 
             // 3. Log Management Section
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.surface
-                    )
-                ) {
+                SettingsCard {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -417,14 +396,7 @@ fun SettingsScreen(
 
             // 4. About Section Entry
             item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(onClick = onNavigateToAbout),
-                    colors = CardDefaults.defaultColors(
-                        color = MiuixTheme.colorScheme.surface
-                    )
-                ) {
+                SettingsCard(onClick = onNavigateToAbout) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()

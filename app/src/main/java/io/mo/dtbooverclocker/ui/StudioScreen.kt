@@ -39,6 +39,7 @@ import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 enum class StudioTab(val label: String, val icon: ImageVector) {
     OVERVIEW("概览", Icons.Default.Dashboard),
@@ -254,13 +255,14 @@ private fun ModulesTab(
 @Composable
 private fun ModuleCard(title: String, subtitle: String, icon: ImageVector, enabled: Boolean, active: Boolean = false, onClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier
-            .width(150.dp)
-            .clickable(enabled = enabled, onClick = onClick),
+        modifier = Modifier.width(150.dp),
         colors = CardDefaults.defaultColors(
             color = if (active) MiuixTheme.colorScheme.primaryContainer
             else MiuixTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 0.55f else 0.28f)
-        )
+        ),
+        // 3D 倾斜按压动画（Miuix Card 内置 PressFeedbackType.Tilt）
+        pressFeedbackType = if (enabled) PressFeedbackType.Tilt else PressFeedbackType.None,
+        onClick = if (enabled) onClick else null
     ) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -286,7 +288,7 @@ private fun WorkspaceRequiredCard() {
 private fun SettingsHubTab(state: MainUiState, padding: PaddingValues, onRequestRoot: () -> Unit, onRefreshEnvironment: () -> Unit, onOpenRollback: () -> Unit, onOpenAdvancedSettings: () -> Unit, onOpenAbout: () -> Unit) {
     LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Spacer(Modifier.height(2.dp)) }
-        item { Card(Modifier.fillMaxWidth()) { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item { SettingsCard { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("环境状态", style = MiuixTheme.textStyles.title2, fontWeight = FontWeight.SemiBold)
             Text(if (state.rootState.granted) "Root 已授权" else state.rootState.detail)
             Text(state.slotInfo?.blockDevice ?: "分区路径检测中", fontFamily = FontFamily.Monospace, style = MiuixTheme.textStyles.footnote1)
@@ -303,8 +305,10 @@ private fun SettingsHubTab(state: MainUiState, padding: PaddingValues, onRequest
 
 @Composable
 private fun SettingsEntry(icon: ImageVector, title: String, subtitle: String, onClick: () -> Unit) {
-    Card(Modifier.fillMaxWidth().clickable(onClick = onClick)) { Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-        Surface(shape = RoundedCornerShape(10.dp), color = MiuixTheme.colorScheme.primaryContainer, modifier = Modifier.size(44.dp)) { Box(contentAlignment = Alignment.Center) { Icon(icon, null) } }
-        Spacer(Modifier.width(14.dp)); Column { Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary) }
-    } }
+    SettingsCard(onClick = onClick) {
+        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(shape = RoundedCornerShape(10.dp), color = MiuixTheme.colorScheme.primaryContainer, modifier = Modifier.size(44.dp)) { Box(contentAlignment = Alignment.Center) { Icon(icon, null) } }
+            Spacer(Modifier.width(14.dp)); Column { Text(title, fontWeight = FontWeight.SemiBold); Text(subtitle, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary) }
+        }
+    }
 }

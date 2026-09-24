@@ -182,12 +182,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             }
 
             // Source Code Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.surface
-                )
-            ) {
+            SettingsCard {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -254,12 +249,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             }
 
             // Architecture & Features Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.surface
-                )
-            ) {
+            SettingsCard {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -293,12 +283,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
             }
 
             // Disclaimer Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.defaultColors(
-                    color = MiuixTheme.colorScheme.surface
-                )
-            ) {
+            SettingsCard {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
