@@ -1,19 +1,20 @@
 package io.mo.dtbooverclocker.ui
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.CardDefaults
-import top.yukonga.miuix.kmp.squircle.squircleBorder
+import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.utils.PressFeedbackType
 
 /**
- * 设置页面统一卡片：Miuix Card + 与 squircle 圆角匹配的细边框
- * （对齐 Miuix Surface 文档的描边风格），可点击时带 Sink 按压反馈。
+ * 设置页面统一卡片：Miuix Surface + 原生 border 参数描边
+ * （对齐 Miuix Surface 文档用法；border 作为 surface 一部分绘制，
+ * 不会被不透明背景盖住——squircleBorder 是 onDrawBehind 会被 Card 背景遮住）。
  */
 @Composable
 fun SettingsCard(
@@ -21,18 +22,25 @@ fun SettingsCard(
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .squircleBorder(
-                width = 1.dp,
-                color = MiuixTheme.colorScheme.outline.copy(alpha = 0.35f),
-                cornerRadius = 16.dp
-            ),
-        cornerRadius = 16.dp,
-        colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surface),
-        pressFeedbackType = if (onClick != null) PressFeedbackType.Sink else PressFeedbackType.None,
-        onClick = onClick,
-        content = content
-    )
+    val shape = RoundedCornerShape(16.dp)
+    val border = BorderStroke(1.dp, MiuixTheme.colorScheme.outline.copy(alpha = 0.5f))
+    val body: @Composable () -> Unit = { Column { content() } }
+    if (onClick != null) {
+        Surface(
+            onClick = onClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = shape,
+            color = MiuixTheme.colorScheme.surface,
+            border = border,
+            content = body
+        )
+    } else {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = shape,
+            color = MiuixTheme.colorScheme.surface,
+            border = border,
+            content = body
+        )
+    }
 }

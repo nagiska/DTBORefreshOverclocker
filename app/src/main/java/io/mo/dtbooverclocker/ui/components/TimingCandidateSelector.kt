@@ -61,7 +61,6 @@ import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextField
-import top.yukonga.miuix.kmp.squircle.squircleBorder
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class PanelFilterScope(val label: String) {
@@ -537,33 +536,23 @@ private fun TimingCandidateCard(
     val nodeName = TimingUtils.parseTimingNodeName(candidate.nodePath)
     val clockStr = TimingUtils.formatClockCompact(candidate.pixelClockHz)
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (selected) {
-                    Modifier.squircleBorder(
-                        width = 2.dp,
-                        color = MiuixTheme.colorScheme.primary,
-                        cornerRadius = 12.dp
-                    )
-                } else {
-                    Modifier.squircleBorder(
-                        width = 1.dp,
-                        color = MiuixTheme.colorScheme.outline.copy(alpha = 0.4f),
-                        cornerRadius = 12.dp
-                    )
-                }
-            ),
-        cornerRadius = 12.dp,
-        colors = CardDefaults.defaultColors(
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) {
+            MiuixTheme.colorScheme.primaryContainer
+        } else {
+            MiuixTheme.colorScheme.surface
+        },
+        border = BorderStroke(
+            width = if (selected) 2.dp else 1.dp,
             color = if (selected) {
-                MiuixTheme.colorScheme.primaryContainer
+                MiuixTheme.colorScheme.primary
             } else {
-                MiuixTheme.colorScheme.surface
+                MiuixTheme.colorScheme.outline.copy(alpha = 0.4f)
             }
-        ),
-        onClick = onClick
+        )
     ) {
         Row(
             modifier = Modifier
