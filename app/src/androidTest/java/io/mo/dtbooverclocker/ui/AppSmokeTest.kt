@@ -54,10 +54,10 @@ class AppSmokeTest {
         compose.onNode(hasText("设置") and hasClickAction()).performClick()
         compose.waitForIdle()
 
-        // 7. 设置 -> 关于
+        // 7. 设置 -> 关于（目标卡片在长页面下方，需先滚动到可见区域）
         compose.onNode(hasText("关于 DTBO Studio") and hasClickAction()).performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("免责声明与风险须知").assertIsDisplayed()
+        compose.onNodeWithText("免责声明与风险须知").performScrollTo().assertIsDisplayed()
         compose.onNode(hasContentDescription("返回设置")).performClick()
         compose.waitForIdle()
 
