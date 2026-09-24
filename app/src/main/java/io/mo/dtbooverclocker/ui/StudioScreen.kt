@@ -66,8 +66,8 @@ fun StudioScreen(
 ) {
     StudioNavigation(pagerState, pageStateHolder, !state.busy, onOpenRollback, onRefreshEnvironment) { tab, padding ->
         when (tab) {
-            StudioTab.OVERVIEW -> OverviewTab(state, padding, onImport, onExtract, onPackage, onReset, onSavePatched, onRecoveryZip, onFastbootBundle, onFlash, onExportBackup, onExportRescue, onScreenshot, onCopy, onClearLogs)
-            StudioTab.MODULES -> ModulesTab(state, padding, onSelect, onTarget, onStrategy, onPatchMode, onCustomPixelClock, onCustomVfp, onCustomVbp, onCustomHfp, onCustomHbp, onApplySuggestedCustom, onStageChange)
+            StudioTab.OVERVIEW -> OverviewTab(state, padding, onImport, onExtract, onClearLogs)
+            StudioTab.MODULES -> ModulesTab(state, padding, onSelect, onTarget, onStrategy, onPatchMode, onCustomPixelClock, onCustomVfp, onCustomVbp, onCustomHfp, onCustomHbp, onApplySuggestedCustom, onStageChange, onPackage, onReset, onSavePatched, onRecoveryZip, onFastbootBundle, onFlash, onExportBackup, onExportRescue, onScreenshot, onCopy)
             StudioTab.DEVICE_TREE -> DeviceTreeScreen(state, padding)
             StudioTab.SETTINGS -> SettingsHubTab(state, padding, onRequestRoot, onRefreshEnvironment, onOpenRollback, onOpenAdvancedSettings, onOpenAbout)
         }
@@ -139,9 +139,7 @@ internal fun StudioNavigation(
 @Composable
 private fun OverviewTab(
     state: MainUiState, padding: PaddingValues, onImport: () -> Unit, onExtract: () -> Unit,
-    onPackage: () -> Unit, onReset: () -> Unit, onSavePatched: (File) -> Unit, onRecoveryZip: () -> Unit,
-    onFastbootBundle: () -> Unit, onFlash: () -> Unit, onExportBackup: (File) -> Unit,
-    onExportRescue: (File) -> Unit, onScreenshot: () -> Unit, onCopy: (String) -> Unit, onClearLogs: () -> Unit
+    onClearLogs: () -> Unit
 ) {
     LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item(key = "top") { Spacer(Modifier.height(2.dp)) }
@@ -149,10 +147,7 @@ private fun OverviewTab(
         item(key = "source") { SourceCard(state, onImport, onExtract) }
         if (state.workspace != null) {
             item(key = "summary") { ImageSummaryCard(state) }
-            if (state.stagedChanges.isNotEmpty()) item(key = "staged") { StagedChangesCard(state.stagedChanges, onPackage, onReset, state.busy) }
         }
-        state.patchReport?.let { report -> item(key = "output") { OutputCard(state, { onSavePatched(report.outputImage) }, onRecoveryZip, onFastbootBundle, onFlash) } }
-        state.lastFlash?.let { flash -> item(key = "rescue") { RescueMemoCard(state, onCopy, { onExportBackup(flash.backupFile) }, { onExportRescue(flash.rescueZip) }, onScreenshot) } }
         item(key = "terminal") { TerminalCard(state.logs, onClearLogs) }
         item(key = "status") { Text(state.status, style = MiuixTheme.textStyles.footnote1, color = MiuixTheme.colorScheme.onSurfaceSecondary, modifier = Modifier.padding(bottom = 24.dp)) }
     }
@@ -184,7 +179,10 @@ private fun ModulesTab(
     state: MainUiState, padding: PaddingValues, onSelect: (String) -> Unit, onTarget: (Int) -> Unit,
     onStrategy: (PatchStrategy) -> Unit, onPatchMode: (PatchMode) -> Unit,
     onCustomPixelClock: (String) -> Unit, onCustomVfp: (String) -> Unit, onCustomVbp: (String) -> Unit,
-    onCustomHfp: (String) -> Unit, onCustomHbp: (String) -> Unit, onApplySuggestedCustom: () -> Unit, onStageChange: () -> Unit
+    onCustomHfp: (String) -> Unit, onCustomHbp: (String) -> Unit, onApplySuggestedCustom: () -> Unit, onStageChange: () -> Unit,
+    onPackage: () -> Unit, onReset: () -> Unit, onSavePatched: (File) -> Unit, onRecoveryZip: () -> Unit,
+    onFastbootBundle: () -> Unit, onFlash: () -> Unit, onExportBackup: (File) -> Unit,
+    onExportRescue: (File) -> Unit, onScreenshot: () -> Unit, onCopy: (String) -> Unit
 ) {
     var activeModule by rememberSaveable { mutableStateOf<StudioModule?>(null) }
     val workspace = state.workspace
@@ -223,6 +221,20 @@ private fun ModulesTab(
             if (refreshRateActive && workspace.candidates.isNotEmpty()) {
                 item {
                     TimingPanel(state, onSelect, onTarget, onStrategy, onPatchMode, onCustomPixelClock, onCustomVfp, onCustomVbp, onCustomHfp, onCustomHbp, onApplySuggestedCustom, onStageChange)
+                }
+                // 集成打包与输出功能随展开区一起呈现在最底部
+                if (state.stagedChanges.isNotEmpty()) {
+                    item { StagedChangesCard(state.stagedChanges, onPackage, onReset, state.busy) }
+                }
+                state.patchReport?.let { report ->
+                    item {
+                        OutputCard(state, { onSavePatched(report.outputImage) }, onRecoveryZip, onFastbootBundle, onFlash)
+                    }
+                }
+                state.lastFlash?.let { flash ->
+                    item {
+                        RescueMemoCard(state, onCopy, { onExportBackup(flash.backupFile) }, { onExportRescue(flash.rescueZip) }, onScreenshot)
+                    }
                 }
             }
             item { Text("硬件", style = MiuixTheme.textStyles.title3, fontWeight = FontWeight.SemiBold) }

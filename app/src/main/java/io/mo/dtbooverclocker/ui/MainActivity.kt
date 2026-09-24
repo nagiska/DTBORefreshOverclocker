@@ -1043,14 +1043,19 @@ internal fun StagedChangesCard(
                         color = MiuixTheme.colorScheme.primary
                     )
                 }
-                Button(
-                    onClick = { showResetDialog = true },
-                    enabled = !busy,
-                    colors = ButtonDefaults.buttonColors(color = Color.Transparent, contentColor = MiuixTheme.colorScheme.primary)
+                Card(
+                    cornerRadius = 10.dp,
+                    colors = CardDefaults.defaultColors(color = MiuixTheme.colorScheme.surface),
+                    onClick = if (busy) null else ({ showResetDialog = true })
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text("重置全部修改")
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Text("重置全部修改", style = MiuixTheme.textStyles.footnote1)
+                    }
                 }
             }
 

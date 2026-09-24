@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -249,7 +250,13 @@ fun TimingCandidateSelector(
                 label = "搜索屏幕或时序",
                 useLabelAsPlaceholder = true,
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Default.Search,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .size(18.dp)
+                    )
                 },
                 trailingIcon = {
                     if (searchQuery.isNotBlank()) {
@@ -532,11 +539,22 @@ private fun TimingCandidateCard(
 
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(
+                if (selected) {
+                    Modifier.border(
+                        width = 2.dp,
+                        color = MiuixTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            ),
         cornerRadius = 12.dp,
         colors = CardDefaults.defaultColors(
             color = if (selected) {
-                MiuixTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+                MiuixTheme.colorScheme.primaryContainer
             } else {
                 MiuixTheme.colorScheme.surface
             }
@@ -569,7 +587,7 @@ private fun TimingCandidateCard(
                         "${candidate.currentHz} Hz",
                         style = MiuixTheme.textStyles.title2,
                         fontWeight = FontWeight.Bold,
-                        color = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
+                        color = if (selected) MiuixTheme.colorScheme.onPrimaryContainer else MiuixTheme.colorScheme.onSurface
                     )
 
                     Surface(
