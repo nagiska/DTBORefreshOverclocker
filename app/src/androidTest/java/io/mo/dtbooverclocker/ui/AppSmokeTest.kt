@@ -1,10 +1,11 @@
 package io.mo.dtbooverclocker.ui
 
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
-import androidx.compose.ui.test.hasRole
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -32,7 +33,7 @@ class AppSmokeTest {
             compose.onAllNodesWithText("同意并继续").fetchSemanticsNodes().isNotEmpty()
         }
         // 2. 勾选风险确认复选框
-        compose.onNode(hasRole(Role.Checkbox)).performClick()
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Checkbox)).performClick()
         compose.waitForIdle()
         // 3. 同意并继续
         compose.onNodeWithText("同意并继续").performClick()
