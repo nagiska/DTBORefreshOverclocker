@@ -19,6 +19,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
+import io.mo.dtbooverclocker.ui.theme.AppTheme
 import top.yukonga.miuix.kmp.basic.TextField
 
 class StudioNavigationTest {
