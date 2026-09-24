@@ -42,17 +42,17 @@ class AppSmokeTest {
         compose.waitForIdle()
 
         // 4. 功能模块 Tab（无工作区时应显示引导卡片）
-        compose.onNode(hasText("功能模块") and hasClickAction()).performClick()
+        compose.onNode(hasContentDescription("功能模块") and hasClickAction()).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("还没有工作区").assertIsDisplayed()
 
         // 5. 设备树 Tab（标题在顶栏副标题/页面标题/底栏多处出现，取首个即可）
-        compose.onNode(hasText("设备树") and hasClickAction()).performClick()
+        compose.onNode(hasContentDescription("设备树") and hasClickAction()).performClick()
         compose.waitForIdle()
         compose.onAllNodesWithText("设备树").onFirst().assertIsDisplayed()
 
         // 6. 设置 Tab
-        compose.onNode(hasText("设置") and hasClickAction()).performClick()
+        compose.onNode(hasContentDescription("设置") and hasClickAction()).performClick()
         compose.waitForIdle()
 
         // 7. 设置 -> 关于（目标卡片在长页面下方，需先滚动到可见区域）
@@ -77,7 +77,7 @@ class AppSmokeTest {
         compose.waitForIdle()
 
         // 10. 返回概览 Tab
-        compose.onNode(hasText("概览") and hasClickAction()).performClick()
+        compose.onNode(hasContentDescription("概览") and hasClickAction()).performClick()
         compose.waitForIdle()
         compose.onNodeWithText("镜像来源").assertIsDisplayed()
     }

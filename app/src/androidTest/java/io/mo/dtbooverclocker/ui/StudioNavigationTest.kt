@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.StateRestorationTester
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import org.junit.Assert.assertEquals
 import org.junit.Rule
@@ -42,7 +43,7 @@ class StudioNavigationTest {
         return restoration
     }
 
-    private fun tab(tab: StudioTab) = compose.onNode(hasText(tab.label) and hasClickAction())
+    private fun tab(tab: StudioTab) = compose.onNode(hasContentDescription(tab.label) and hasClickAction())
 
     @Test
     fun swipesAndTabClicksStayInSync() {

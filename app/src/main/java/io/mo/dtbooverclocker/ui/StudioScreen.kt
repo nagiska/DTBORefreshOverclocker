@@ -20,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import io.mo.dtbooverclocker.model.PatchMode
 import io.mo.dtbooverclocker.model.PatchStrategy
 import io.mo.dtbooverclocker.ui.components.MiuixInfoChip
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import java.io.File
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -27,15 +29,15 @@ import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
-import top.yukonga.miuix.kmp.basic.NavigationBar
-import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.basic.Surface
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.basic.ToolbarPosition
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 enum class StudioTab(val label: String, val icon: ImageVector) {
@@ -84,6 +86,7 @@ internal fun StudioNavigation(
     val selectedTab = StudioTab.entries[pagerState.currentPage]
     val scope = rememberCoroutineScope()
     var navigationJob by remember { mutableStateOf<Job?>(null) }
+    val pageBackdrop = rememberLayerBackdrop()
     Scaffold(
         topBar = {
             SmallTopAppBar(
@@ -97,24 +100,31 @@ internal fun StudioNavigation(
                 }
             )
         },
-        bottomBar = {
-            NavigationBar { StudioTab.entries.forEach { tab ->
-                NavigationBarItem(
-                    selected = selectedTab == tab,
-                    onClick = {
-                        navigationJob?.cancel()
-                        navigationJob = scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
-                    },
-                    icon = tab.icon,
-                    label = tab.label,
-                    enabled = enabled
-                )
-            } }
-        }
+        floatingToolbar = {
+            // Miuix 悬浮底栏 + Liquid Glass 液态玻璃效果
+            LiquidGlassFloatingToolbar(backdrop = pageBackdrop) {
+                StudioTab.entries.forEach { tab ->
+                    FloatingNavigationBarItem(
+                        selected = selectedTab == tab,
+                        onClick = {
+                            navigationJob?.cancel()
+                            navigationJob = scope.launch { pagerState.animateScrollToPage(tab.ordinal) }
+                        },
+                        icon = tab.icon,
+                        label = tab.label,
+                        enabled = enabled
+                    )
+                }
+            }
+        },
+        floatingToolbarPosition = ToolbarPosition.BottomCenter
     ) { padding ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize().padding(padding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .layerBackdrop(pageBackdrop),
             key = { StudioTab.entries[it].name },
             userScrollEnabled = enabled
         ) { page ->

@@ -99,6 +99,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
+    implementation("io.github.kyant0:backdrop-android:2.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
