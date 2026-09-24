@@ -50,7 +50,8 @@ import io.mo.dtbooverclocker.BuildConfig
 import io.mo.dtbooverclocker.ui.components.UpdateCheckDialog
 import io.mo.dtbooverclocker.ui.scaleLineHeight
 import io.mo.dtbooverclocker.update.GitHubUpdateChecker
-import top.yukonga.miuix.kmp.basic.Buttonimport top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Button
+import top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
