@@ -48,9 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import io.mo.dtbooverclocker.BuildConfig
 import io.mo.dtbooverclocker.ui.components.UpdateCheckDialog
+import io.mo.dtbooverclocker.ui.scaleLineHeight
 import io.mo.dtbooverclocker.update.GitHubUpdateChecker
-import top.yukonga.miuix.kmp.basic.Button
-import top.yukonga.miuix.kmp.basic.ButtonDefaults
+import top.yukonga.miuix.kmp.basic.Buttonimport top.yukonga.miuix.kmp.basic.ButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.HorizontalDivider
@@ -286,7 +286,7 @@ fun AboutScreen(onNavigateBack: () -> Unit) {
                                 "• 多种时序调整策略：支持平衡消隐时间 (Blanking Time)、仅像素时钟、仅帧率等调校模式。",
                         style = MiuixTheme.textStyles.footnote1,
                         color = MiuixTheme.colorScheme.onSurfaceSecondary,
-                        lineHeight = MiuixTheme.textStyles.footnote1.lineHeight * 1.3
+                        lineHeight = MiuixTheme.textStyles.footnote1.lineHeight.scaleLineHeight(1.3f)
                     )
                 }
             }

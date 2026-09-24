@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.mo.dtbooverclocker.ui.scaleLineHeight
 import kotlinx.coroutines.delay
 import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.ButtonDefaults
@@ -93,7 +94,7 @@ fun DisclaimerDialog(
                 text = "欢迎使用 DTBO Refresh Overclocker。在继续使用并授予 Root 权限前，请务必仔细阅读以下内容：",
                 style = MiuixTheme.textStyles.body2,
                 color = MiuixTheme.colorScheme.onSurface,
-                lineHeight = MiuixTheme.textStyles.body2.lineHeight * 1.2
+                lineHeight = MiuixTheme.textStyles.body2.lineHeight.scaleLineHeight(1.2f)
             )
 
             // 1. 高危操作声明
@@ -236,7 +237,7 @@ private fun DisclaimerSection(
                 text = content,
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurface,
-                lineHeight = MiuixTheme.textStyles.footnote1.lineHeight * 1.25
+                lineHeight = MiuixTheme.textStyles.footnote1.lineHeight.scaleLineHeight(1.25f)
             )
         }
     }
